@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Les Carnets d'Hortense</title>
+  <meta name="description" content="Suivre les repas, les couches, le sommeil et la santé d'Hortense.">
+  <meta name="theme-color" content="#f7dcd8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#2b2440" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Hortense">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=3">
+</head>
+<body class="verrouille">
+  <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
+  <div class="login" id="login" hidden>
+    <div class="login-sky" aria-hidden="true">
+      <div class="login-sun"></div>
+      <div class="stars"></div>
+      <svg class="cloud lc1" viewBox="0 0 100 40"><path d="M15 35 a12 12 0 0 1 8-22 a16 16 0 0 1 30-4 a13 13 0 0 1 24 6 a10 10 0 0 1 8 20z"/></svg>
+      <svg class="cloud lc2" viewBox="0 0 100 40"><path d="M15 35 a12 12 0 0 1 8-22 a16 16 0 0 1 30-4 a13 13 0 0 1 24 6 a10 10 0 0 1 8 20z"/></svg>
+    </div>
+    <div class="login-scene" id="login-scene" aria-hidden="true"></div>
+
+    <form class="login-box" id="login-form" autocomplete="on">
+      <div class="login-lion" aria-hidden="true">
+        <svg viewBox="0 0 100 100">
+            <circle cx="24" cy="27" r="15" class="ours-oreille"/><circle cx="76" cy="27" r="15" class="ours-oreille"/>
+            <circle cx="24" cy="27" r="8" class="ours-int"/><circle cx="76" cy="27" r="8" class="ours-int"/>
+            <circle cx="50" cy="55" r="36" class="ours-tete"/>
+            <ellipse cx="50" cy="67" rx="16" ry="12" class="ours-museau"/>
+            <g class="blink"><circle cx="37" cy="50" r="4" class="ink"/><circle cx="63" cy="50" r="4" class="ink"/></g>
+            <ellipse cx="50" cy="61" rx="6" ry="4.5" class="ink"/>
+            <path d="M44 70 q6 5 12 0" fill="none" stroke-width="3" stroke-linecap="round" class="ink-stroke"/>
+            <circle cx="29" cy="64" r="5" class="cheek"/><circle cx="71" cy="64" r="5" class="cheek"/>
+            <g class="hortensia-oreille"><circle cx="80" cy="15" r="5"/><circle cx="88" cy="20" r="5"/><circle cx="84" cy="27" r="5"/><circle cx="76" cy="23" r="5"/><circle cx="82" cy="21" r="2.2" class="coeur"/></g>
+          </svg>
+      </div>
+      <p class="login-hello">Bienvenue dans</p>
+      <h1 class="login-titre">les carnets d'<span>Hortense</span></h1>
+      <p class="login-sous">Qui es-tu ?</p>
+      <div class="who-grid login-grid" id="login-profils"></div>
+      <div id="login-suite" hidden>
+        <label class="field wide">
+          <span>Mot de passe</span>
+          <input type="password" id="login-mdp" autocomplete="current-password" required>
+        </label>
+        <button type="submit" class="add-btn" id="login-btn"><span>Entrer</span><span class="emoji" aria-hidden="true">🦁</span></button>
+      </div>
+      <p class="login-erreur" id="login-erreur" role="alert"></p>
+      <p class="hint small">Le mot de passe est à demander aux parents. Il ne se tape qu'une fois sur ce téléphone.</p>
+      <p class="hint small demo-hint" id="login-demo" hidden>🧸 Mode découverte : choisissez un profil et tapez n'importe quel mot de passe.</p>
+    </form>
+  </div>
+
+  <!-- Petit tuto pour les grands-parents (première connexion) -->
+  <dialog class="sheet tuto" id="tuto" aria-labelledby="tuto-titre">
+    <form method="dialog" class="tuto-box">
+      <div class="tuto-emoji" id="tuto-emoji" aria-hidden="true">👋</div>
+      <p class="sheet-title" id="tuto-titre"></p>
+      <p class="tuto-texte" id="tuto-texte"></p>
+      <div class="tuto-dots" id="tuto-dots" aria-hidden="true"></div>
+      <div class="sheet-actions">
+        <button type="button" class="g-btn" id="tuto-suivant">Suivant</button>
+        <button type="submit" value="fin" class="link" id="tuto-passer">Passer</button>
+      </div>
+    </form>
+  </dialog>
+
+
+  <!-- Ciel -->
+  <div class="sky" aria-hidden="true">
+    <div class="stars"></div>
+    <svg class="cloud c1" viewBox="0 0 100 40"><path d="M15 35 a12 12 0 0 1 8-22 a16 16 0 0 1 30-4 a13 13 0 0 1 24 6 a10 10 0 0 1 8 20z"/></svg>
+    <svg class="cloud c2" viewBox="0 0 100 40"><path d="M15 35 a12 12 0 0 1 8-22 a16 16 0 0 1 30-4 a13 13 0 0 1 24 6 a10 10 0 0 1 8 20z"/></svg>
+  </div>
+
+  <main class="app">
+    <header class="scene">
+      <div class="sun" aria-hidden="true">
+        <svg viewBox="0 0 120 120">
+          <g class="rays">
+            <circle cx="60" cy="60" r="56" fill="none" stroke="currentColor" stroke-width="6" stroke-dasharray="10 12" stroke-linecap="round"/>
+          </g>
+          <circle cx="60" cy="60" r="40" fill="currentColor"/>
+          <g class="sun-face">
+            <path d="M41 57 q6 -6 12 0 M67 57 q6 -6 12 0" fill="none" stroke-width="4" stroke-linecap="round"/>
+            <path d="M48 70 q12 10 24 0" fill="none" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="40" cy="67" r="5" class="cheek"/><circle cx="80" cy="67" r="5" class="cheek"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Savane animée : les animaux sont pilotés par scene.js -->
+      <svg class="landscape" viewBox="0 0 400 140" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <defs>
+          <!-- Une petite fleur d'hortensia (4 pétales) réutilisée partout -->
+          <g id="fleur">
+            <circle cx="0" cy="-1.6" r="1.7"/><circle cx="1.6" cy="0" r="1.7"/><circle cx="0" cy="1.6" r="1.7"/><circle cx="-1.6" cy="0" r="1.7"/>
+            <circle cx="0" cy="0" r=".8" class="coeur"/>
+          </g>
+          <!-- Une boule d'hortensia -->
+          <g id="boule">
+            <circle cx="0" cy="0" r="7.5" class="boule-fond"/>
+            <use href="#fleur" x="-3.5" y="-3"/><use href="#fleur" x="2.5" y="-4"/><use href="#fleur" x="4.5" y="1.5"/>
+            <use href="#fleur" x="-4.5" y="2"/><use href="#fleur" x="0" y="0.5"/><use href="#fleur" x="0.5" y="4.5"/>
+          </g>
+        </defs>
+
+        <!-- Papillons -->
+        <g id="birds" class="birds" transform="translate(0 30)">
+          <g class="walker">
+            <g transform="translate(0 0)"><g class="papillon"><g class="ailes">
+              <ellipse class="aile-h" cx="-4.5" cy="-2.5" rx="4.5" ry="3.6"/><ellipse class="aile-h" cx="4.5" cy="-2.5" rx="4.5" ry="3.6"/>
+              <ellipse class="aile-b" cx="-3.2" cy="2.4" rx="3" ry="2.4"/><ellipse class="aile-b" cx="3.2" cy="2.4" rx="3" ry="2.4"/>
+            </g><rect class="papillon-corps" x="-.8" y="-4" width="1.6" height="8" rx=".8"/></g></g>
+            <g transform="translate(22 -9) scale(.8)"><g class="papillon p2"><g class="ailes">
+              <ellipse class="aile-h" cx="-4.5" cy="-2.5" rx="4.5" ry="3.6"/><ellipse class="aile-h" cx="4.5" cy="-2.5" rx="4.5" ry="3.6"/>
+              <ellipse class="aile-b" cx="-3.2" cy="2.4" rx="3" ry="2.4"/><ellipse class="aile-b" cx="3.2" cy="2.4" rx="3" ry="2.4"/>
+            </g><rect class="papillon-corps" x="-.8" y="-4" width="1.6" height="8" rx=".8"/></g></g>
+          </g>
+        </g>
+
+        <path class="hill-back" d="M0 90 Q80 55 170 80 T400 70 V140 H0z"/>
+
+        <!-- Arbre fleuri (la cloche y est suspendue) -->
+        <g class="arbre">
+          <path class="tronc" d="M326 112 C327 96 324 86 318 74 M325 92 C331 84 338 80 344 76" fill="none" stroke-width="5" stroke-linecap="round"/>
+          <circle class="feuillage" cx="306" cy="54" r="18"/>
+          <circle class="feuillage" cx="326" cy="46" r="21"/>
+          <circle class="feuillage" cx="348" cy="56" r="17"/>
+          <circle class="feuillage clair" cx="322" cy="40" r="9"/>
+          <use href="#boule" x="300" y="48" transform="scale(.9)" transform-origin="300 48"/>
+          <use href="#boule" x="330" y="38"/>
+          <use href="#boule" x="350" y="54" transform="scale(.85)" transform-origin="350 54"/>
+          <use href="#boule" x="316" y="62" transform="scale(.75)" transform-origin="316 62"/>
+        </g>
+
+        <!-- Petit lapin (sort de derrière la colline) -->
+        <g id="meerkat" class="meerkat lapin" transform="translate(372 116)">
+          <g class="walker">
+            <ellipse cx="-2" cy="-34" rx="2.4" ry="7.5" class="l-corps" transform="rotate(-8 -2 -34)"/>
+            <ellipse cx="3" cy="-34" rx="2.4" ry="7.5" class="l-corps" transform="rotate(10 3 -34)"/>
+            <ellipse cx="-2" cy="-34" rx="1.1" ry="5" class="l-oreille" transform="rotate(-8 -2 -34)"/>
+            <ellipse cx="3" cy="-34" rx="1.1" ry="5" class="l-oreille" transform="rotate(10 3 -34)"/>
+            <ellipse cx="0.5" cy="-10" rx="7" ry="12" class="l-corps"/>
+            <circle cx="0.5" cy="-24" r="6.5" class="l-corps"/>
+            <path d="M-2.6 -25 q1.3 -1.3 2.6 0 M2 -25 q1.3 -1.3 2.6 0" class="l-oeil"/>
+            <circle cx="0.8" cy="-21.6" r="1" class="l-nez"/>
+            <circle cx="-3.4" cy="-21" r="1.4" class="blush"/><circle cx="5" cy="-21" r="1.4" class="blush"/>
+          </g>
+        </g>
+
+        <!-- Maman ourse : elle se promène et vient sentir les hortensias -->
+        <g id="giraffe" class="animal giraffe ourse" transform="translate(0 106)">
+          <g class="walker">
+            <g class="bob">
+              <g transform="translate(-12 -13)"><g class="leg leg-b"><rect x="-4" y="0" width="8" height="13" rx="4" class="fur-dark"/></g></g>
+              <g transform="translate(9 -13)"><g class="leg leg-a"><rect x="-4" y="0" width="8" height="13" rx="4" class="fur-dark"/></g></g>
+              <circle cx="-20" cy="-25" r="3.5" class="fur"/>
+              <ellipse cx="0" cy="-23" rx="21" ry="15" class="fur"/>
+              <ellipse cx="3" cy="-18" rx="12" ry="8" class="muzzle"/>
+              <g transform="translate(-6 -13)"><g class="leg leg-a"><rect x="-4" y="0" width="8" height="13" rx="4" class="fur"/></g></g>
+              <g transform="translate(15 -13)"><g class="leg leg-b"><rect x="-4" y="0" width="8" height="13" rx="4" class="fur"/></g></g>
+              <!-- Tête (pivot au cou) -->
+              <g transform="translate(14 -28)">
+                <g class="neck">
+                  <g class="head">
+                    <circle cx="2" cy="-17" r="4.5" class="fur"/><circle cx="2" cy="-17" r="2.3" class="oreille-in"/>
+                    <circle cx="15" cy="-18" r="4.5" class="fur"/><circle cx="15" cy="-18" r="2.3" class="oreille-in"/>
+                    <circle cx="8" cy="-8" r="11" class="fur"/>
+                    <ellipse cx="16" cy="-5" rx="6.5" ry="5" class="muzzle"/>
+                    <ellipse cx="20" cy="-6.5" rx="2.2" ry="1.7" class="ink"/>
+                    <path d="M7 -11 q2.3 -2.3 4.6 0" class="happy-eye"/>
+                    <circle cx="11" cy="-3" r="2" class="blush"/>
+                    <use href="#fleur" x="-1" y="-20" class="fleur-oreille" transform="scale(1.4)" transform-origin="-1 -20"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+
+        <!-- Ourson : il se promène -->
+        <g id="elephant" class="animal elephant ourson" transform="translate(0 108)">
+          <g class="walker">
+            <g class="facing">
+              <g class="bob">
+                <g transform="translate(-8 -8)"><g class="leg leg-b"><rect x="-3" y="0" width="6" height="8" rx="3" class="skin-dark"/></g></g>
+                <g transform="translate(6 -8)"><g class="leg leg-a"><rect x="-3" y="0" width="6" height="8" rx="3" class="skin-dark"/></g></g>
+                <ellipse cx="0" cy="-15" rx="13" ry="10" class="skin"/>
+                <ellipse cx="2" cy="-12" rx="7" ry="5" class="ventre"/>
+                <g transform="translate(-4 -8)"><g class="leg leg-a"><rect x="-3" y="0" width="6" height="8" rx="3" class="skin"/></g></g>
+                <g transform="translate(10 -8)"><g class="leg leg-b"><rect x="-3" y="0" width="6" height="8" rx="3" class="skin"/></g></g>
+                <circle cx="9" cy="-31" r="3.3" class="skin"/><circle cx="9" cy="-31" r="1.7" class="ear-in"/>
+                <circle cx="19" cy="-30" r="3.3" class="skin"/><circle cx="19" cy="-30" r="1.7" class="ear-in"/>
+                <circle cx="13" cy="-24" r="8.5" class="skin"/>
+                <ellipse cx="19" cy="-21.5" rx="4.8" ry="3.8" class="ventre"/>
+                <ellipse cx="22" cy="-22.5" rx="1.7" ry="1.3" class="ink"/>
+                <path d="M12 -26 q2 -2 4 0" class="happy-eye"/>
+                <circle cx="14" cy="-20" r="1.6" class="blush"/>
+                <g transform="translate(22 -22)"><g class="trunk"></g></g>
+              </g>
+            </g>
+          </g>
+        </g>
+
+        <path class="hill-front" d="M0 112 Q100 92 200 108 T400 100 V140 H0z"/>
+        <!-- Massif d'hortensias (la maman ourse vient les sentir) -->
+        <g class="massif">
+          <ellipse class="feuille-massif" cx="250" cy="110" rx="9" ry="4" transform="rotate(-20 250 110)"/>
+          <ellipse class="feuille-massif" cx="270" cy="110" rx="9" ry="4" transform="rotate(20 270 110)"/>
+          <ellipse class="feuille-massif" cx="260" cy="112" rx="10" ry="4"/>
+          <use href="#boule" x="250" y="103"/>
+          <use href="#boule" x="266" y="101" class="boule-lilas"/>
+          <use href="#boule" x="259" y="96" transform="scale(.9)" transform-origin="259 96"/>
+        </g>
+        <!-- Petites fleurs dans l'herbe -->
+        <g class="petites-fleurs">
+          <use href="#fleur" x="34" y="106"/><use href="#fleur" x="44" y="104"/><use href="#fleur" x="160" y="104"/>
+          <use href="#fleur" x="172" y="106"/><use href="#fleur" x="214" y="109"/><use href="#fleur" x="336" y="104"/>
+        </g>
+
+        <!-- 🔔 La cloche des nouvelles : un médaillon suspendu par un ruban à l'arbre fleuri -->
+        <g class="cloche-svg" id="cloche" role="button" tabindex="0" aria-label="Nouvelles" hidden>
+          <path class="liane" d="M300 60 q4 4 0 8 q-4 4 0 7"/>
+          <ellipse class="feuille" cx="303.5" cy="63.5" rx="3" ry="1.6" transform="rotate(30 303.5 63.5)"/>
+          <ellipse class="feuille" cx="296.5" cy="70.5" rx="3" ry="1.6" transform="rotate(-30 296.5 70.5)"/>
+          <g transform="translate(300 75) scale(1.2)">
+            <g class="cloche-balance">
+              <!-- médaillon en bois -->
+              <circle class="medaillon-ombre" cx="0.8" cy="15.8" r="15"/>
+              <circle class="medaillon" cx="0" cy="15" r="15"/>
+              <circle class="medaillon-cercle" cx="0" cy="15" r="12"/>
+              <!-- icône de cloche, bien reconnaissable -->
+              <path class="icone-cloche" d="M0 6.2 C-4.6 6.2 -6.4 9.6 -6.4 13.2 L-6.4 16.8 L-8.4 19.6 L8.4 19.6 L6.4 16.8 L6.4 13.2 C6.4 9.6 4.6 6.2 0 6.2 Z"/>
+              <circle class="icone-cloche" cx="0" cy="5.6" r="1.4"/>
+              <path class="icone-cloche" d="M-2.4 20.8 A2.4 2.4 0 0 0 2.4 20.8 Z"/>
+            </g>
+          </g>
+          <!-- pastille classique avec le nombre -->
+          <g class="cloche-pastille" id="cloche-pastille" hidden>
+            <circle cx="313.5" cy="79" r="7.5"/>
+            <text id="cloche-nb" x="313.5" y="82.3" text-anchor="middle">1</text>
+          </g>
+          <circle class="cloche-zone" cx="300" cy="92" r="26"/>
+        </g>
+      </svg>
+
+      <div class="top">
+        <div class="lion" aria-hidden="true">
+          <span class="zzz"><span>z</span><span>z</span><span>Z</span></span>
+          <svg viewBox="0 0 100 100">
+            <circle cx="24" cy="27" r="15" class="ours-oreille"/><circle cx="76" cy="27" r="15" class="ours-oreille"/>
+            <circle cx="24" cy="27" r="8" class="ours-int"/><circle cx="76" cy="27" r="8" class="ours-int"/>
+            <circle cx="50" cy="55" r="36" class="ours-tete"/>
+            <ellipse cx="50" cy="67" rx="16" ry="12" class="ours-museau"/>
+            <g class="eyes-open"><circle cx="37" cy="50" r="4" class="ink"/><circle cx="63" cy="50" r="4" class="ink"/></g>
+            <path class="eyes-closed ink-stroke" d="M32 50 q5 4 10 0 M58 50 q5 4 10 0" fill="none" stroke-width="3" stroke-linecap="round"/>
+            <ellipse cx="50" cy="61" rx="6" ry="4.5" class="ink"/>
+            <path d="M44 70 q6 5 12 0" fill="none" stroke-width="3" stroke-linecap="round" class="ink-stroke"/>
+            <circle cx="29" cy="64" r="5" class="cheek"/><circle cx="71" cy="64" r="5" class="cheek"/>
+            <g class="hortensia-oreille"><circle cx="80" cy="15" r="5"/><circle cx="88" cy="20" r="5"/><circle cx="84" cy="27" r="5"/><circle cx="76" cy="23" r="5"/><circle cx="82" cy="21" r="2.2" class="coeur"/></g>
+          </svg>
+        </div>
+        <div>
+          <p class="hello">Les carnets d'</p>
+          <h1>Hortense</h1>
+          <p class="moi" id="moi" hidden><span id="moi-nom"></span> · <button type="button" class="link" id="moi-changer">changer</button><button type="button" class="link demo-lien" id="demo-ouvrir" hidden>🧸 démo</button> <span class="moi-version" id="moi-version"></span></p>
+          <p class="sync-badge" id="sync-badge" hidden></p>
+        </div>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="Rubriques">
+      <button type="button" class="tab" role="tab" data-page="0"><span class="tab-emoji" aria-hidden="true">🍼</span><span>Repas</span></button>
+      <button type="button" class="tab" role="tab" data-page="1"><span class="tab-emoji" aria-hidden="true">👶</span><span>Couches</span></button>
+      <button type="button" class="tab" role="tab" data-page="2"><span class="tab-emoji" aria-hidden="true">🌙</span><span>Sommeil</span></button>
+      <button type="button" class="tab" role="tab" data-page="3"><span class="tab-emoji" aria-hidden="true">🩺</span><span>Santé</span></button>
+      <button type="button" class="tab" role="tab" data-page="4"><span class="tab-emoji" aria-hidden="true">👵</span><span>Garde</span></button>
+    </nav>
+
+    <div class="pages" id="pages">
+      <!-- ================= REPAS ================= -->
+      <div class="page" id="page-repas" role="tabpanel" aria-label="Repas">
+        <p class="ro-banner">👀 Consultation seulement : seuls les parents modifient cette page.</p>
+        <section class="card night-card" id="nuit-card" hidden aria-live="polite">
+          <p class="label">🌙 Repas de nuit en cours · dodo en pause</p>
+          <p class="timer night-timer" id="nuit-timer">0:00:00</p>
+          <p class="sub" id="nuit-info"></p>
+          <button type="button" class="add-btn sleep" id="nuit-rendort">
+            <span class="emoji" aria-hidden="true">😴</span><span>Fin du repas, elle se rendort</span>
+          </button>
+          <button type="button" class="link center" id="nuit-eveille">Elle reste réveillée</button>
+        </section>
+        <section class="card timer-card" aria-live="polite">
+          <p class="label">Dernier repas il y a</p>
+          <p class="timer" id="repas-timer">--:--</p>
+          <p class="sub" id="repas-info">Chargement…</p>
+        </section>
+
+        <section class="stats">
+          <div class="card stat">
+            <p class="label">Aujourd'hui</p>
+            <p class="big"><span id="repas-today-count">0</span> <span class="unit">repas</span></p>
+            <p class="detail" id="repas-today-bib"></p>
+            <p class="detail" id="repas-today-all"></p>
+          </div>
+          <div class="card stat">
+            <p class="label">Sur 24 h</p>
+            <p class="big"><span id="repas-day-count">0</span> <span class="unit">repas</span></p>
+            <p class="detail" id="repas-day-bib"></p>
+            <p class="detail" id="repas-day-all"></p>
+          </div>
+        </section>
+
+        <section class="card chart-card" id="chart-repas-card">
+          <div class="chart-head">
+            <p class="label">📈 Lait bu ces 7 jours</p>
+            <p class="chart-moy" id="chart-repas-moy"></p>
+          </div>
+          <div class="chart" id="chart-repas" role="img"></div>
+          <p class="chart-detail" id="chart-repas-detail">Touche une barre pour voir le détail du jour.</p>
+        </section>
+
+        <section class="card add-card">
+          <div class="mode" role="tablist" aria-label="Type de repas">
+            <button type="button" class="mode-btn" role="tab" data-mode="biberon">
+              <span class="emoji" aria-hidden="true">🍼</span><span>Biberon</span>
+            </button>
+            <button type="button" class="mode-btn" role="tab" data-mode="allaitement">
+              <span class="emoji" aria-hidden="true">🤱</span><span>Allaitement</span>
+            </button>
+          </div>
+
+          <div class="panel" id="panel-biberon">
+            <p class="label">Type de lait</p>
+            <div class="chips lait" id="chips-lait" role="radiogroup" aria-label="Type de lait"></div>
+            <p class="label">Quantité</p>
+            <div class="ml-row">
+              <button type="button" class="ml-step" id="ml-moins" aria-label="10 ml de moins">−</button>
+              <label class="ml-picker">
+                <span class="ml-label">Combien ?</span>
+                <span class="ml-value" id="ml-value">150 ml</span>
+                <span class="ml-chevron" aria-hidden="true">▾</span>
+                <select id="ml-select" aria-label="Quantité du biberon"></select>
+              </label>
+              <button type="button" class="ml-step" id="ml-plus" aria-label="10 ml de plus">+</button>
+            </div>
+          </div>
+
+          <div class="panel" id="panel-allaitement" hidden>
+            <p class="label">Côté</p>
+            <div class="chips" id="chips-cote" role="radiogroup" aria-label="Côté"></div>
+            <p class="label">Durée</p>
+            <div class="chips" id="chips-duree" role="radiogroup" aria-label="Durée"></div>
+          </div>
+
+          <div class="when">
+            <label for="repas-heure">Heure</label>
+            <input type="time" id="repas-heure">
+            <button type="button" class="link" data-now="repas-heure">Maintenant</button>
+          </div>
+
+          <button type="button" class="add-btn" id="repas-btn">
+            <span class="emoji" id="repas-btn-emoji" aria-hidden="true">🍼</span>
+            <span id="repas-btn-label">Nouveau biberon</span>
+          </button>
+        </section>
+
+        <section class="card history">
+          <p class="label">Dernières 24 heures</p>
+          <ul id="repas-list"></ul>
+          <p class="empty" id="repas-empty" hidden>Aucun repas sur les dernières 24 heures.</p>
+        </section>
+      </div>
+
+      <!-- ================= COUCHES ================= -->
+      <div class="page" id="page-couches" role="tabpanel" aria-label="Couches">
+        <p class="ro-banner">👀 Consultation seulement : seuls les parents modifient cette page.</p>
+        <section class="card timer-card" aria-live="polite">
+          <p class="label">Dernière couche changée il y a</p>
+          <p class="timer" id="couche-timer">--:--</p>
+          <p class="sub" id="couche-info">Chargement…</p>
+          <div class="mini-timer">
+            <span class="mini-label">💩 Dernier caca il y a</span>
+            <span class="mini-value" id="caca-timer">--:--</span>
+          </div>
+          <p class="sub small" id="caca-info"></p>
+        </section>
+
+        <section class="stats">
+          <div class="card stat">
+            <p class="label">Aujourd'hui</p>
+            <p class="big"><span id="couche-today-count">0</span> <span class="unit">couches</span></p>
+            <p class="detail" id="couche-today-pipi"></p>
+            <p class="detail" id="couche-today-caca"></p>
+          </div>
+          <div class="card stat">
+            <p class="label">Sur 24 h</p>
+            <p class="big"><span id="couche-day-count">0</span> <span class="unit">couches</span></p>
+            <p class="detail" id="couche-day-pipi"></p>
+            <p class="detail" id="couche-day-caca"></p>
+          </div>
+        </section>
+
+        <section class="card add-card">
+          <p class="label">Dans la couche</p>
+          <div class="mode">
+            <button type="button" class="mode-btn toggle" id="t-pipi" aria-pressed="false">
+              <span class="emoji" aria-hidden="true">💧</span><span>Pipi</span>
+            </button>
+            <button type="button" class="mode-btn toggle" id="t-caca" aria-pressed="false">
+              <span class="emoji" aria-hidden="true">💩</span><span>Caca</span>
+            </button>
+          </div>
+
+          <div class="panel" id="panel-caca" hidden>
+            <p class="label">Taille du caca</p>
+            <div class="chips sizes" id="chips-taille" role="radiogroup" aria-label="Taille du caca"></div>
+          </div>
+
+          <div class="when">
+            <label for="couche-heure">Heure</label>
+            <input type="time" id="couche-heure">
+            <button type="button" class="link" data-now="couche-heure">Maintenant</button>
+          </div>
+
+          <button type="button" class="add-btn couche" id="couche-btn">
+            <span class="emoji" aria-hidden="true">👶</span>
+            <span id="couche-btn-label">Couche changée</span>
+          </button>
+        </section>
+
+        <section class="card history">
+          <p class="label">Dernières 24 heures</p>
+          <ul id="couche-list"></ul>
+          <p class="empty" id="couche-empty" hidden>Aucune couche sur les dernières 24 heures.</p>
+        </section>
+      </div>
+
+      <!-- ================= SOMMEIL ================= -->
+      <div class="page" id="page-sommeil" role="tabpanel" aria-label="Sommeil">
+        <p class="ro-banner">👀 Consultation seulement : seuls les parents modifient cette page.</p>
+        <section class="card timer-card sleep-card" id="sleep-card" aria-live="polite">
+          <p class="label" id="sleep-label">Réveillée depuis</p>
+          <p class="timer" id="sleep-timer">--:--</p>
+          <p class="sub" id="sleep-info">Chargement…</p>
+        </section>
+
+        <section class="stats">
+          <div class="card stat">
+            <p class="label">Aujourd'hui</p>
+            <p class="big" id="sleep-today-total">0 min</p>
+            <p class="detail" id="sleep-today-count"></p>
+          </div>
+          <div class="card stat">
+            <p class="label">Sur 24 h</p>
+            <p class="big" id="sleep-day-total">0 min</p>
+            <p class="detail" id="sleep-day-count"></p>
+          </div>
+        </section>
+
+        <section class="card chart-card" id="chart-sommeil-card">
+          <div class="chart-head">
+            <p class="label">📈 Sommeil ces 7 jours</p>
+            <p class="chart-moy" id="chart-sommeil-moy"></p>
+          </div>
+          <div class="chart" id="chart-sommeil" role="img"></div>
+          <p class="chart-detail" id="chart-sommeil-detail">Touche une barre pour voir le détail du jour.</p>
+        </section>
+
+        <section class="card add-card">
+          <div class="when">
+            <label for="sleep-heure">Heure</label>
+            <input type="time" id="sleep-heure">
+            <button type="button" class="link" data-now="sleep-heure">Maintenant</button>
+          </div>
+          <button type="button" class="add-btn sleep" id="sleep-btn">
+            <span class="emoji" id="sleep-btn-emoji" aria-hidden="true">🌙</span>
+            <span id="sleep-btn-label">Elle s'endort</span>
+          </button>
+        </section>
+
+        <section class="card history">
+          <p class="label">Dernières 24 heures</p>
+          <ul id="sleep-list"></ul>
+          <p class="empty" id="sleep-empty" hidden>Aucun dodo sur les dernières 24 heures.</p>
+        </section>
+      </div>
+
+      <!-- ================= SANTÉ ================= -->
+      <div class="page" id="page-sante" role="tabpanel" aria-label="Santé">
+        <p class="ro-banner">💊 Ici tu peux noter un médicament que tu donnes à Hortense, et consulter sa fiche santé.</p>
+        <section class="card med-card" aria-live="polite">
+          <div class="med-head">
+            <span class="med-title">💊 Médicaments</span>
+            <button type="button" class="med-add" id="med-toggle" aria-expanded="false">+ Prise</button>
+          </div>
+          <ul class="med-list" id="med-list"></ul>
+          <div class="med-form" id="med-form" hidden>
+            <div class="chips small-chips" id="med-noms"></div>
+            <div class="med-fields">
+              <input type="text" id="med-nom" maxlength="60" placeholder="Médicament" aria-label="Nom du médicament" list="med-suggest">
+              <datalist id="med-suggest"></datalist>
+              <input type="text" id="med-dose" maxlength="40" placeholder="Dose (facultatif)" aria-label="Dose">
+              <input type="time" id="med-heure" aria-label="Heure (vide = maintenant)">
+            </div>
+            <button type="button" class="g-btn med-save" id="med-btn">💊 Enregistrer la prise</button>
+          </div>
+        </section>
+
+        <section class="card firsts-card parents-seulement">
+          <div class="med-head">
+            <span class="med-title">🌟 Ses premières fois</span>
+            <button type="button" class="med-add" id="firsts-toggle" aria-expanded="false">+ Ajouter</button>
+          </div>
+          <ul class="firsts-list" id="firsts-list"></ul>
+          <div class="med-form" id="firsts-form" hidden>
+            <div class="chips small-chips" id="firsts-choix" role="radiogroup" aria-label="Premières fois"></div>
+            <div class="med-fields">
+              <input type="text" id="first-quoi" maxlength="80" placeholder="Ou écris-le ici" aria-label="Quelle première fois ?">
+              <input type="date" id="first-date" aria-label="Date (vide = aujourd'hui)">
+            </div>
+            <button type="button" class="g-btn med-save" id="first-btn">🎉 Noter et fêter</button>
+          </div>
+        </section>
+        <section class="card timer-card rdv-card parents-seulement">
+          <p class="age" id="sante-age"></p>
+          <p class="label">Prochain rendez-vous</p>
+          <p class="rdv-when" id="rdv-next-when">Aucun rendez-vous prévu</p>
+          <p class="sub" id="rdv-next-info">Ajoute-le juste en dessous 👇</p>
+        </section>
+
+        <section class="card add-card parents-seulement" id="rdv-form">
+          <p class="label">Nouveau rendez-vous</p>
+          <div class="chips" id="chips-rdv" role="radiogroup" aria-label="Type de rendez-vous"></div>
+          <div class="fields">
+            <label class="field wide"><span>Date</span><input type="date" id="rdv-date" required></label>
+            <label class="field wide"><span>Heure</span><input type="time" id="rdv-heure"></label>
+            <label class="field wide"><span>Pour quoi ?</span><input type="text" id="rdv-titre" maxlength="120" placeholder="Ex. vaccins des 2 mois"></label>
+            <label class="field wide"><span>Questions à poser, notes</span><textarea id="rdv-notes" maxlength="1000" rows="2" placeholder="Ex. demander pour les régurgitations"></textarea></label>
+          </div>
+          <button type="button" class="add-btn sante" id="rdv-btn">
+            <span class="emoji" aria-hidden="true">📅</span><span>Ajouter le rendez-vous</span>
+          </button>
+        </section>
+
+        <section class="card history parents-seulement">
+          <p class="label">Rendez-vous à venir</p>
+          <ul id="rdv-list" class="rdv-list"></ul>
+          <p class="empty" id="rdv-empty" hidden>Aucun rendez-vous à venir.</p>
+          <details class="more" id="rdv-past-box" hidden>
+            <summary>Rendez-vous passés</summary>
+            <ul id="rdv-past" class="rdv-list"></ul>
+          </details>
+        </section>
+
+        <section class="card parents-seulement">
+          <p class="label">Vaccins et examens obligatoires</p>
+          <p class="hint" id="cal-hint">Renseigne la date de naissance dans la fiche santé (en bas) pour voir les dates prévues.</p>
+          <p class="cal-next" id="cal-next" hidden></p>
+          <details class="more cal-box" id="cal-box">
+          <summary>Voir le calendrier complet</summary>
+          <div class="cal-legend"><span class="tag oblig">obligatoire</span><span class="tag reco">recommandé</span></div>
+          <h3 class="cal-title">💉 Vaccins</h3>
+          <ul class="cal" id="cal-vaccins"></ul>
+          <h3 class="cal-title">📋 Examens de santé</h3>
+          <ul class="cal" id="cal-examens"></ul>
+          <details class="more">
+            <summary>Examens de 3 à 16 ans</summary>
+            <ul class="cal" id="cal-examens-tard"></ul>
+          </details>
+          </details>
+          <p class="hint small">Repères indicatifs d'après le calendrier des vaccinations 2026 (Santé publique France) et les 20 examens obligatoires de l'enfant. Le pédiatre et le carnet de santé font foi.</p>
+        </section>
+
+        <section class="card parents-seulement">
+          <p class="label">Croissance</p>
+          <div class="growth" id="growth-last"></div>
+          <div class="fields">
+            <label class="field wide"><span>Date</span><input type="date" id="m-date"></label>
+            <label class="field"><span>Poids (kg)</span><input type="text" id="m-poids" inputmode="decimal" autocomplete="off" placeholder="4,250"></label>
+            <label class="field"><span>Taille (cm)</span><input type="text" id="m-taille" inputmode="decimal" autocomplete="off" placeholder="55,5"></label>
+            <label class="field"><span>Tour de tête (cm)</span><input type="text" id="m-pc" inputmode="decimal" autocomplete="off" placeholder="38"></label>
+          </div>
+          <button type="button" class="add-btn sante small" id="m-btn">
+            <span class="emoji" aria-hidden="true">📏</span><span>Enregistrer la mesure</span>
+          </button>
+          <ul id="m-list" class="m-list"></ul>
+        </section>
+
+        <section class="card">
+          <p class="label">Fiche santé</p>
+          <ul class="fiche" id="fiche-resume"></ul>
+          <details class="more" id="fiche-box">
+            <summary>Modifier la fiche</summary>
+            <div class="fields">
+              <label class="field wide"><span>Date de naissance</span><input type="date" id="f-date_naissance"></label>
+              <label class="field wide"><span>Heure de naissance</span><input type="time" id="f-heure_naissance"></label>
+              <label class="field"><span>Poids de naissance (g)</span><input type="text" id="f-poids_naissance_g" inputmode="numeric" autocomplete="off" placeholder="3400"></label>
+              <label class="field"><span>Taille de naissance (cm)</span><input type="text" id="f-taille_naissance_cm" inputmode="decimal" autocomplete="off" placeholder="50"></label>
+              <label class="field"><span>Tour de tête naissance (cm)</span><input type="text" id="f-pc_naissance_cm" inputmode="decimal" autocomplete="off" placeholder="35"></label>
+              <label class="field"><span>Groupe sanguin</span>
+                <select id="f-groupe_sanguin">
+                  <option value="">Je ne sais pas</option>
+                  <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                  <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                </select>
+              </label>
+              <label class="field wide"><span>Allergies</span><input type="text" id="f-allergies" maxlength="500" placeholder="Aucune connue"></label>
+              <label class="field wide"><span>Traitements en cours (vitamine D…)</span><input type="text" id="f-traitements" maxlength="500" placeholder="Ex. vitamine D, 1 goutte/jour"></label>
+              <label class="field wide"><span>Pédiatre / médecin</span><input type="text" id="f-pediatre_nom" maxlength="120" placeholder="Dr …"></label>
+              <label class="field"><span>Téléphone</span><input type="tel" id="f-pediatre_tel" maxlength="30" placeholder="01 23 45 67 89"></label>
+              <label class="field wide"><span>Adresse du cabinet</span><input type="text" id="f-pediatre_adresse" maxlength="200"></label>
+              <label class="field wide"><span>Notes (antécédents, maternité…)</span><textarea id="f-notes" maxlength="1000" rows="3"></textarea></label>
+            </div>
+            <button type="button" class="add-btn sante small" id="f-btn">
+              <span class="emoji" aria-hidden="true">💾</span><span>Enregistrer la fiche</span>
+            </button>
+          </details>
+          <p class="hint small">En cas d'urgence : <a href="tel:15">15</a> (Samu) ou <a href="tel:112">112</a>. Médecin de garde le soir et le week-end : <a href="tel:116117">116 117</a> (selon la région).</p>
+        </section>
+      </div>
+
+      <!-- ================= GARDE (micro-crèche, grands-parents) ================= -->
+      <div class="page" id="page-garde" role="tabpanel" aria-label="Garde">
+        <section class="card whoami" id="g-whoami">
+          <div class="who-set">
+            <span class="who-name" id="g-who-name"></span>
+          </div>
+          <div class="chips garde-choix" id="g-garde-choix" role="radiogroup" aria-label="Gardée par" hidden>
+            <button type="button" class="chip" role="radio" data-garde="Micro-crèche">🏡 Micro-crèche</button>
+            <button type="button" class="chip" role="radio" data-garde="Grands-parents">👵 Grands-parents</button>
+          </div>
+        </section>
+
+        <section class="card garde-day">
+          <div class="day-nav">
+            <button type="button" class="day-arrow" id="g-prev" aria-label="Jour précédent">‹</button>
+            <div class="day-title">
+              <p class="day-name" id="g-day-name">Aujourd'hui</p>
+              <p class="day-date" id="g-day-date"></p>
+            </div>
+            <button type="button" class="day-arrow" id="g-next" aria-label="Jour suivant">›</button>
+          </div>
+          <p class="garde-by" id="g-by"></p>
+          <ul class="notes" id="g-notes"></ul>
+          <div id="g-my-note" hidden>
+            <label class="field wide note-field">
+              <span id="g-my-note-label">📝 Ma note du jour</span>
+              <textarea id="g-note" maxlength="2000" rows="4" placeholder="Ce qu'on a fait aujourd'hui, comment elle était, ce qu'il faut savoir…"></textarea>
+            </label>
+            <button type="button" class="add-btn garde small" id="g-note-btn">
+              <span class="emoji" aria-hidden="true">💾</span><span>Enregistrer ma note</span>
+            </button>
+            <p class="hint small center-text" id="g-note-saved"></p>
+          </div>
+        </section>
+
+        <section class="card garde-recap">
+          <p class="label">Récap de la journée</p>
+
+          <div class="g-row">
+            <div class="g-head"><span class="g-emoji" aria-hidden="true">🍼</span><span class="g-title">Repas</span><span class="g-sum" id="g-repas-sum"></span></div>
+            <div class="pills" id="g-repas-list"></div>
+            <div class="g-add" data-today-only>
+              <select id="g-ml" aria-label="Quantité">
+                <option value="">? ml</option><option value="10">10 ml</option><option value="20">20 ml</option><option value="30">30 ml</option><option value="40">40 ml</option><option value="50">50 ml</option><option value="60">60 ml</option><option value="70">70 ml</option><option value="80">80 ml</option><option value="90">90 ml</option><option value="100">100 ml</option><option value="110">110 ml</option><option value="120">120 ml</option><option value="130">130 ml</option><option value="140">140 ml</option><option value="150" selected>150 ml</option><option value="160">160 ml</option><option value="170">170 ml</option><option value="180">180 ml</option><option value="190">190 ml</option><option value="200">200 ml</option><option value="210">210 ml</option><option value="220">220 ml</option><option value="230">230 ml</option><option value="240">240 ml</option><option value="250">250 ml</option><option value="260">260 ml</option><option value="270">270 ml</option><option value="280">280 ml</option><option value="290">290 ml</option><option value="300">300 ml</option>
+              </select>
+              <select id="g-lait" aria-label="Type de lait">
+                <option value="poudre">🥄 Poudre</option><option value="maternel">🥛 Maternel</option>
+              </select>
+              <button type="button" class="g-btn" id="g-repas-btn">+ Biberon</button>
+            </div>
+          </div>
+
+          <div class="g-row">
+            <div class="g-head"><span class="g-emoji" aria-hidden="true">👶</span><span class="g-title">Couches</span><span class="g-sum" id="g-couche-sum"></span></div>
+            <div class="pills" id="g-couche-list"></div>
+            <div class="g-add" data-today-only>
+              <button type="button" class="g-btn" data-couche="pipi">+ 💧</button>
+              <button type="button" class="g-btn" data-couche="caca">+ 💩</button>
+              <button type="button" class="g-btn" data-couche="les deux">+ 💧💩</button>
+            </div>
+          </div>
+
+          <div class="g-row">
+            <div class="g-head"><span class="g-emoji" aria-hidden="true">😴</span><span class="g-title">Sommeil</span><span class="g-sum" id="g-sleep-sum"></span></div>
+            <div class="pills" id="g-sleep-list"></div>
+            <div class="g-add" data-today-only>
+              <button type="button" class="g-btn wide" id="g-sleep-btn">🌙 Elle s'endort</button>
+            </div>
+            <div class="g-add g-range" data-writer-only>
+              <label class="field"><span>Endormie à</span><input type="time" id="g-dodo-debut"></label>
+              <label class="field"><span>Réveillée à</span><input type="time" id="g-dodo-fin"></label>
+              <button type="button" class="g-btn wide alt" id="g-dodo-add">+ Ajouter ce dodo</button>
+            </div>
+          </div>
+
+          <p class="hint small" id="g-read-hint">👀 Mode consultation. Pour noter quelque chose, choisis qui tu es tout en haut.</p>
+          <p class="hint small" id="g-past-hint" hidden>Pour noter un repas ou une couche, reviens sur aujourd'hui. Un dodo peut être ajouté pour n'importe quel jour.</p>
+          <p class="hint small" id="g-tuto-box" hidden><button type="button" class="link" id="g-tuto">💡 Revoir le petit tuto</button></p>
+          <p class="hint small">Tout est enregistré en ligne : chaque téléphone qui a le lien voit les mêmes notes et le même récap. Rien ne se mélange avec vos pages Repas, Couches et Sommeil. Touche deux fois une de tes pastilles pour l'effacer.</p>
+        </section>
+      </div>
+    </div>
+
+    <p class="error" id="error" role="alert" hidden></p>
+  </main>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <!-- Petite fête (confettis) -->
+  <dialog class="sheet fete" id="fete" aria-labelledby="fete-titre">
+    <form method="dialog" class="fete-box">
+      <div class="fete-emoji" id="fete-emoji" aria-hidden="true">🎉</div>
+      <p class="sheet-title" id="fete-titre"></p>
+      <p class="tuto-texte" id="fete-texte"></p>
+      <button type="submit" value="ok" class="g-btn fete-btn">Trop bien ! 🥳</button>
+    </form>
+  </dialog>
+
+  <!-- Cloche : les nouvelles (famille, rappels doux, récap du mois) -->
+  <dialog class="sheet notifs" id="notifs" aria-labelledby="notifs-titre">
+    <form method="dialog">
+      <p class="sheet-title" id="notifs-titre">🔔 Les nouvelles</p>
+      <ul class="notifs-list" id="notifs-list"></ul>
+      <div class="sheet-actions">
+        <button type="submit" value="ok" class="g-btn">Fermer</button>
+        <button type="button" class="link" id="notifs-recap">📊 Récap du mois</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Récap du mois, à copier pour l'envoyer -->
+  <dialog class="sheet recap" id="recap" aria-labelledby="recap-titre">
+    <form method="dialog">
+      <div class="recap-head">
+        <p class="sheet-title" id="recap-titre">📊 Récap</p>
+        <input type="month" id="recap-mois" aria-label="Choisir le mois">
+      </div>
+      <pre class="recap-texte" id="recap-texte"></pre>
+      <div class="recap-actions">
+        <button type="button" class="g-btn" id="recap-copier">📋 Copier</button>
+        <button type="button" class="g-btn alt" id="recap-partager" hidden>📤 Partager</button>
+      </div>
+      <div class="sheet-actions">
+        <button type="submit" value="ok" class="link">Fermer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Mode découverte -->
+  <dialog class="sheet" id="demo-dialog" aria-labelledby="demo-titre">
+    <form method="dialog">
+      <p class="sheet-title" id="demo-titre">🧸 Mode découverte</p>
+      <p class="tuto-texte">Le carnet fonctionne déjà en entier, mais pour l'instant <strong>tout reste sur ce téléphone</strong>. Quand la base des parents sera branchée, les données seront partagées entre les téléphones de la famille.</p>
+      <div class="recap-actions">
+        <button type="button" class="g-btn" id="demo-exemple">🌸 Remplir avec un exemple</button>
+      </div>
+      <div class="sheet-actions">
+        <button type="submit" value="ok" class="g-btn alt">Fermer</button>
+        <button type="button" class="link" id="demo-effacer">Tout effacer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Diagnostic réseau (en touchant le badge 📶) -->
+  <dialog class="sheet" id="diag" aria-labelledby="diag-titre">
+    <form method="dialog">
+      <p class="sheet-title" id="diag-titre">📶 Connexion</p>
+      <pre class="diag-texte" id="diag-texte"></pre>
+      <p class="hint small">Si le souci revient, fais une capture d'écran de cette fenêtre pour Julien.</p>
+      <div class="sheet-actions">
+        <button type="submit" value="ok" class="g-btn">OK</button>
+        <button type="button" class="link" id="diag-vider" hidden>Vider la file d'attente</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Fenêtre de modification d'une entrée (repas, couche, dodo) -->
+  <dialog class="sheet" id="edit-dialog" aria-labelledby="edit-title">
+    <form method="dialog" id="edit-form">
+      <p class="sheet-title" id="edit-title">Modifier</p>
+      <div class="fields" id="edit-fields"></div>
+      <div class="sheet-actions">
+        <button type="submit" value="ok" class="g-btn">Enregistrer</button>
+        <button type="submit" value="annuler" class="link">Annuler</button>
+      </div>
+    </form>
+  </dialog>
+
+
+  <script src="scene.js?v=3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script src="config.js?v=3"></script>
+  <script src="commun.js?v=3"></script>
+  <script src="demo.js?v=3"></script>
+  <script src="auth.js?v=3"></script>
+  <script src="repas.js?v=3"></script>
+  <script src="couches.js?v=3"></script>
+  <script src="sommeil.js?v=3"></script>
+  <script src="sante.js?v=3"></script>
+  <script src="medicaments.js?v=3"></script>
+  <script src="garde.js?v=3"></script>
+  <script src="graphiques.js?v=3"></script>
+  <script src="fetes.js?v=3"></script>
+  <script src="notifs.js?v=3"></script>
+  <script src="tuto.js?v=3"></script>
+  <script src="pages.js?v=3"></script>
+</body>
+</html>
