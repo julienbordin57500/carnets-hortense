@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ erreur: "méthode" }, 405);
 
   const url = Deno.env.get("SUPABASE_URL")!;
-  const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const admin = createClient(url, (Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_SECRET_KEY"))!);
 
   // Qui fait la demande ? Seul le compte Parents a le droit
   const jeton = (req.headers.get("Authorization") || "").replace("Bearer ", "");

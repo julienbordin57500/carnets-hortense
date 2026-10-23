@@ -1,9 +1,9 @@
 // ⚙️ Réglages de l'appli
-// En mode démo, tout fonctionne sans serveur : les données restent sur ce téléphone.
-// Quand la vraie base (Supabase, au nom des parents) sera prête, il suffira de mettre
-// demo: false et de renseigner son adresse et sa clé publique.
+// demo: true = tout fonctionne sans serveur, les données restent sur le téléphone.
+// demo: false = vraie base Supabase des parents (projet « Carnets-Hortense », organisation Clairette).
+// La clé ci-dessous est la clé publique : elle peut être dans le code, les règles d'accès protègent les données.
 const CONFIG = {
-  demo: true,
-  supabaseUrl: "",
-  supabaseKey: "",
+  demo: false,
+  supabaseUrl: "https://mpfuvjdqembcnndgbsnm.supabase.co",
+  supabaseKey: "sb_publishable_lATsCwwa3QbB-piVnwwnaA_9m7MRKMe",
 };
