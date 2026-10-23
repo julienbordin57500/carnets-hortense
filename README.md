@@ -1,6 +1,6 @@
 # Les Carnets d'Hortense 🧸🌸
 
-Petite appli web pour suivre le quotidien d'Hortense : repas (biberons, allaitements), couches, sommeil, santé et garde (micro-crèche, grands-parents).
+Petite appli web pour suivre le quotidien d'Hortense : repas (biberons, allaitements), couches, sommeil, santé et garde (grands-parents).
 
 - Deux profils : **Parents** (tout) et **Grands-parents** (Garde et Santé), droits vérifiés par le serveur
 - Thème « oursons et hortensias », mode nuit automatique, illustrations en SVG

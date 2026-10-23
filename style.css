@@ -1,6 +1,6 @@
 :root {
   /* Palette « oursons et hortensias » : rose poudré, beige, crème, vert sauge */
-  --sky-top: #f7dcd8;
+  --sky-top: #f9d3d3;
   --sky-bottom: #fcf3ec;
   --sun: #f6c9a8;
   --sun-face: #b77a6c;
@@ -15,46 +15,46 @@
   --muzzle: #efd8bf;
   --elephant: #e3c5a3;
   --elephant-dark: #cfae8b;
-  --ear-in: #f1b9bf;
+  --ear-in: #f3abb5;
   --meerkat: #fbf6f1;
   --meerkat-belly: #f4c6cc;
   --pond: #bcd3da;
   --pond-shine: #eef6f8;
   --bird-body: #ef9fb0;
   --bird-belly: #f6cdd6;
-  --bird-wing: #e58aa0;
-  --bird-wing-back: #f3b3c2;
+  --bird-wing: #ea7f9a;
+  --bird-wing-back: #f5a9bb;
   --bird2-body: #c7a3dc;
   --bird2-wing: #b48fd0;
   --bird2-wing-back: #d9c0ea;
-  --hortensia: #e9a3b2;
+  --hortensia: #ee95aa;
   --hortensia-2: #c9a7d8;
-  --hortensia-clair: #f6d0d8;
-  --boule-fond: #f3c1cb;
+  --hortensia-clair: #f8c6d1;
+  --boule-fond: #f5b4c3;
   --sleep: #9b8ccc;
   --wake: #e2b86f;
   --couche: #8db3ad;
-  --sante: #c4848b;
+  --sante: #c87a85;
   --garde: #c49a72;
   --chart-repas: #c06b7b;
   --chart-sommeil: #8676c2;
-  --milk: #d88a97;
+  --milk: #dc7f90;
   --breast: #b07fa5;
   --card: rgba(255, 251, 248, 0.95);
-  --card-border: #f1d9d6;
+  --card-border: #f3d0cf;
   --ink: #5b3f42;
   --ink-soft: #9a7b7e;
-  --accent: #d4848f;
+  --accent: #d87888;
   --accent-ink: #ffffff;
-  --chip: #fcefed;
+  --chip: #fde9ea;
   --chip-on: #9fb490;
   --chip-on-ink: #ffffff;
   --mane: #c79a74;
   --lion: #c79a74;
   --ours: #c79a74;
-  --ours-int: #f1b9bf;
+  --ours-int: #f3abb5;
   --ours-museau: #efd8bf;
-  --cheek: #f2a6ae;
+  --cheek: #f39aa6;
   --good: #7f9e6f;
   --warn: #d49a55;
   --late: #c46767;
@@ -91,7 +91,7 @@
     --bird2-body: #a58fbd;
     --bird2-wing: #9580ae;
     --bird2-wing-back: #b8a6cc;
-    --hortensia: #b87f95;
+    --hortensia: #c27591;
     --hortensia-2: #9a83ad;
     --hortensia-clair: #d6aab8;
     --boule-fond: #8f6a80;
@@ -108,7 +108,7 @@
     --card-border: #5d4c74;
     --ink: #f8ede9;
     --ink-soft: #cdbcd0;
-    --accent: #e8a0aa;
+    --accent: #ec94a2;
     --accent-ink: #3a2330;
     --chip: #463a5c;
     --chip-on: #b9cba9;
@@ -153,7 +153,7 @@
   --bird2-body: #a58fbd;
   --bird2-wing: #9580ae;
   --bird2-wing-back: #b8a6cc;
-  --hortensia: #b87f95;
+  --hortensia: #c27591;
   --hortensia-2: #9a83ad;
   --hortensia-clair: #d6aab8;
   --boule-fond: #8f6a80;
@@ -170,7 +170,7 @@
   --card-border: #5d4c74;
   --ink: #f8ede9;
   --ink-soft: #cdbcd0;
-  --accent: #e8a0aa;
+  --accent: #ec94a2;
   --accent-ink: #3a2330;
   --chip: #463a5c;
   --chip-on: #b9cba9;
@@ -1118,16 +1118,27 @@ dialog.sheet::backdrop { touch-action: none; }
 .lapin .l-oeil { fill: none; stroke: #5b3f42; stroke-width: 1; stroke-linecap: round; }
 .lapin .l-nez { fill: #e58a9a; }
 
-/* Papillons */
-.papillon .aile-h { fill: var(--bird-wing); }
-.papillon .aile-b { fill: var(--bird-wing-back); }
+/* Papillons : ailes en deux parties, motif, antennes ; battement en « ouvert / fermé » vu de dessus */
+.papillon .aile-haut { fill: var(--bird-wing); }
+.papillon .aile-bas { fill: var(--bird-wing-back); }
+.papillon .aile-point { fill: #fff6f2; opacity: .85; }
+.papillon .aile-point.petit { opacity: .7; }
 .papillon-corps { fill: #7a5a5a; }
+.papillon .antenne { fill: none; stroke: #7a5a5a; stroke-width: .7; stroke-linecap: round; }
 .papillon.p2 { --bird-wing: var(--bird2-wing); --bird-wing-back: var(--bird2-wing-back); }
-.birds.on .ailes { animation: battre .2s ease-in-out infinite alternate; }
-.birds.on .p2 .ailes { animation-duration: .17s; }
-.birds.on .papillon { animation: glide 1.2s ease-in-out infinite alternate; }
-.birds.on .p2 { animation-delay: -.6s; }
-@keyframes battre { from { transform: scaleX(1); } to { transform: scaleX(.25); } }
+/* Chaque côté se replie vers le corps (origine au corps), comme des ailes qui se ferment */
+.birds.on .aile-cote { animation: battre .34s cubic-bezier(.45, 0, .55, 1) infinite alternate; }
+.birds.on .p2 .aile-cote { animation-duration: .3s; animation-delay: -.12s; }
+@keyframes battre { 0% { transform: scaleX(1) skewY(0deg); } 100% { transform: scaleX(.18) skewY(-8deg); } }
+/* Ils volettent : petites montées et descentes, légère inclinaison */
+.birds.on .vol { animation: voleter 1.6s ease-in-out infinite; }
+.birds.on .p2 .vol { animation-duration: 1.3s; animation-delay: -.5s; }
+@keyframes voleter {
+  0%, 100% { transform: translateY(0) rotate(8deg); }
+  25% { transform: translateY(-5px) rotate(14deg); }
+  50% { transform: translateY(-1px) rotate(4deg); }
+  75% { transform: translateY(-6px) rotate(12deg); }
+}
 
 /* Avatar ourson (en-tête et accueil) */
 .lion .ours-oreille, .lion .ours-tete, .login-lion .ours-oreille, .login-lion .ours-tete { fill: var(--ours); }
@@ -1163,3 +1174,14 @@ dialog.sheet::backdrop { touch-action: none; }
 .moi { white-space: nowrap; flex-wrap: nowrap; max-width: 100%; }
 .demo-lien { margin-left: 6px; color: var(--accent); font-weight: 700; }
 .demo-lien::before { content: "·"; margin-right: 6px; color: var(--ink-soft); font-weight: 600; }
+
+/* Page « comptes » */
+.compte-ligne { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "nom bouton" "droits bouton"; gap: 2px 10px; align-items: center; padding: 10px 12px; border-radius: 16px; background: var(--chip); margin-bottom: 8px; }
+.compte-nom { grid-area: nom; font-weight: 700; }
+.compte-droits { grid-area: droits; font-size: .85rem; color: var(--ink-soft); }
+.compte-ligne .g-btn { grid-area: bouton; font-size: .9rem; padding: 8px 12px; white-space: normal; max-width: 140px; }
+.compte-mdp { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+/* Menu « réglages » */
+.reglages-liste { display: flex; flex-direction: column; gap: 8px; }
+.reglages-liste .who-btn { justify-content: flex-start; padding-left: 16px; }

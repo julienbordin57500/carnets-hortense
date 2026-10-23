@@ -156,6 +156,26 @@ const connexionPrete = new Promise((r) => (resoudreConnexion = r));
     montrerConnexion();
   };
 
+  // Changer un mot de passe (page « comptes », parents uniquement)
+  // - Parents : directement, avec la connexion en cours
+  // - Grands-parents : via la petite fonction serveur « comptes » (elle vérifie que la demande vient des parents)
+  window.changerMotDePasse = async (compte, mdp) => {
+    if (CONFIG.demo) throw new Error("demo");
+    if (!estParent()) throw new Error("interdit");
+    if (compte === "parents") {
+      const { error } = await sb.auth.updateUser({ password: mdp });
+      if (error) throw error;
+      return;
+    }
+    const jeton = await obtenirJeton();
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/comptes`, {
+      method: "POST",
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${jeton}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ compte: "famille", mot_de_passe: mdp }),
+    });
+    if (!res.ok) throw new Error(`Erreur ${res.status}`);
+  };
+
   $("login-form").addEventListener("submit", seConnecter);
   $("moi-changer").addEventListener("click", seDeconnecter);
 

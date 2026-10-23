@@ -1,27 +1,20 @@
-// Page Garde : la journée d'Hortense chez la micro-crèche ou les grands-parents (notes du jour + récap simplifié)
+// Page Garde : l'espace des grands-parents (notes du jour + récap simplifié)
 // Les données sont à part (tables garde_*) et ne se mélangent pas avec celles des parents.
-// - Grands-parents : ils notent eux-mêmes, signé « Grands-parents »
-// - Parents : ils peuvent recopier les transmissions de la micro-crèche (signé « Micro-crèche »)
+// Les grands-parents notent (signé « Grands-parents ») ; les parents consultent, comme pour le carnet de Noah.
 (() => {
-  const GARDES = [
-    { nom: "Micro-crèche", emoji: "🏡" },
-    { nom: "Grands-parents", emoji: "👵" },
-  ];
-  const EMOJI_CONNUS = Object.fromEntries(GARDES.map((g) => [g.nom, g.emoji]));
+  const EMOJI_CONNUS = { "Grands-parents": "👵" };
 
   // Profil côté garde : { nom, emoji, parent }
   let tel = null;
-  // Au nom de qui on note : les grands-parents pour eux-mêmes, la micro-crèche (ou les grands-parents) pour les parents
+  // Celui qui peut noter : les grands-parents (les parents consultent seulement)
   let moi = null;
-  let choixParents = lire("garde-parents", "Micro-crèche", (v) => GARDES.some((g) => g.nom === v));
   // Suit le profil connecté (appelé à chaque chargement : la connexion peut arriver avant ou après ce fichier)
   function suivreProfil() {
-    const cle = profil ? `${profil.role}:${profil.nom}:${choixParents}` : "";
+    const cle = profil ? `${profil.role}:${profil.nom}` : "";
     if (cle === suivreProfil.cle) return;
     suivreProfil.cle = cle;
     tel = profil ? { nom: profil.nom, emoji: profil.emoji, parent: estParent() } : null;
-    const g = tel?.parent ? GARDES.find((x) => x.nom === choixParents) : GARDES[1];
-    moi = tel ? { nom: g.nom, emoji: g.emoji } : null;
+    moi = tel && !tel.parent ? { nom: "Grands-parents", emoji: "👵" } : null;
     noteModifiee = false;
   }
 
@@ -62,9 +55,7 @@
   // ---------- Affichage ----------
   function rendre() {
     // Qui utilise ce téléphone
-    $("g-who-name").textContent = !tel ? "" : tel.parent ? "Gardée aujourd'hui par :" : `${moi.emoji} Grands-parents · vous pouvez noter la journée`;
-    $("g-garde-choix").hidden = !tel?.parent;
-    document.querySelectorAll("#g-garde-choix .chip").forEach((c) => c.setAttribute("aria-checked", String(c.dataset.garde === choixParents)));
+    $("g-who-name").textContent = !tel ? "" : tel.parent ? "👨‍👩‍👧 Parents · vous consultez ce que les grands-parents notent" : "👵 Grands-parents · vous pouvez noter la journée";
 
     // Jour
     const nom = jour.toLocaleDateString("fr-FR", { weekday: "long" });
@@ -102,7 +93,7 @@
     document.querySelectorAll("#page-garde [data-writer-only]").forEach((el) => (el.hidden = !moi));
     $("g-read-hint").hidden = !!moi;
     $("g-read-hint").textContent = tel?.parent
-      ? "👀 Vous voyez tout ce que la micro-crèche et les grands-parents ont noté."
+      ? "👀 Mode parents : vous voyez tout ce que les grands-parents notent."
       : "👀 Mode consultation.";
     $("g-past-hint").hidden = !moi || aujourdhui;
 
@@ -269,13 +260,6 @@
     charger();
   }
 
-  document.querySelectorAll("#g-garde-choix .chip").forEach((c) =>
-    c.addEventListener("click", () => {
-      choixParents = c.dataset.garde;
-      ecrire("garde-parents", choixParents);
-      charger();
-    })
-  );
   $("g-prev").addEventListener("click", () => changerJour(-1));
   $("g-next").addEventListener("click", () => changerJour(1));
   $("g-note").addEventListener("input", () => {

@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -114,17 +114,43 @@
           </g>
         </defs>
 
-        <!-- Papillons -->
+        <!-- Papillons (vus de dessus, ils battent des ailes en volant) -->
         <g id="birds" class="birds" transform="translate(0 30)">
           <g class="walker">
-            <g transform="translate(0 0)"><g class="papillon"><g class="ailes">
-              <ellipse class="aile-h" cx="-4.5" cy="-2.5" rx="4.5" ry="3.6"/><ellipse class="aile-h" cx="4.5" cy="-2.5" rx="4.5" ry="3.6"/>
-              <ellipse class="aile-b" cx="-3.2" cy="2.4" rx="3" ry="2.4"/><ellipse class="aile-b" cx="3.2" cy="2.4" rx="3" ry="2.4"/>
-            </g><rect class="papillon-corps" x="-.8" y="-4" width="1.6" height="8" rx=".8"/></g></g>
-            <g transform="translate(22 -9) scale(.8)"><g class="papillon p2"><g class="ailes">
-              <ellipse class="aile-h" cx="-4.5" cy="-2.5" rx="4.5" ry="3.6"/><ellipse class="aile-h" cx="4.5" cy="-2.5" rx="4.5" ry="3.6"/>
-              <ellipse class="aile-b" cx="-3.2" cy="2.4" rx="3" ry="2.4"/><ellipse class="aile-b" cx="3.2" cy="2.4" rx="3" ry="2.4"/>
-            </g><rect class="papillon-corps" x="-.8" y="-4" width="1.6" height="8" rx=".8"/></g></g>
+            <g transform="translate(0 0) scale(.85)"><g class="papillon "><g class="vol">
+              <g><g class="aile-cote">
+                <path class="aile-haut" d="M0 -1 C2 -9 10 -13 14 -9 C17 -5 13 0 0 1 Z"/>
+                <path class="aile-bas" d="M0 1 C7 1 12 4 10 9 C8 12 3 9 0 3 Z"/>
+                <circle class="aile-point" cx="8.5" cy="-6.5" r="2"/>
+                <circle class="aile-point petit" cx="6" cy="5.5" r="1.2"/>
+              </g></g>
+              <g transform="scale(-1 1)"><g class="aile-cote">
+                <path class="aile-haut" d="M0 -1 C2 -9 10 -13 14 -9 C17 -5 13 0 0 1 Z"/>
+                <path class="aile-bas" d="M0 1 C7 1 12 4 10 9 C8 12 3 9 0 3 Z"/>
+                <circle class="aile-point" cx="8.5" cy="-6.5" r="2"/>
+                <circle class="aile-point petit" cx="6" cy="5.5" r="1.2"/>
+              </g></g>
+              <ellipse class="papillon-corps" cx="0" cy="0.5" rx="1.2" ry="5.5"/>
+              <circle class="papillon-corps" cx="0" cy="-5.6" r="1.5"/>
+              <path class="antenne" d="M-0.6 -6.6 Q-2.5 -10 -4 -10.6 M0.6 -6.6 Q2.5 -10 4 -10.6"/>
+            </g></g></g>
+            <g transform="translate(26 -10) scale(.62)"><g class="papillon p2"><g class="vol">
+              <g><g class="aile-cote">
+                <path class="aile-haut" d="M0 -1 C2 -9 10 -13 14 -9 C17 -5 13 0 0 1 Z"/>
+                <path class="aile-bas" d="M0 1 C7 1 12 4 10 9 C8 12 3 9 0 3 Z"/>
+                <circle class="aile-point" cx="8.5" cy="-6.5" r="2"/>
+                <circle class="aile-point petit" cx="6" cy="5.5" r="1.2"/>
+              </g></g>
+              <g transform="scale(-1 1)"><g class="aile-cote">
+                <path class="aile-haut" d="M0 -1 C2 -9 10 -13 14 -9 C17 -5 13 0 0 1 Z"/>
+                <path class="aile-bas" d="M0 1 C7 1 12 4 10 9 C8 12 3 9 0 3 Z"/>
+                <circle class="aile-point" cx="8.5" cy="-6.5" r="2"/>
+                <circle class="aile-point petit" cx="6" cy="5.5" r="1.2"/>
+              </g></g>
+              <ellipse class="papillon-corps" cx="0" cy="0.5" rx="1.2" ry="5.5"/>
+              <circle class="papillon-corps" cx="0" cy="-5.6" r="1.5"/>
+              <path class="antenne" d="M-0.6 -6.6 Q-2.5 -10 -4 -10.6 M0.6 -6.6 Q2.5 -10 4 -10.6"/>
+            </g></g></g>
           </g>
         </g>
 
@@ -273,7 +299,7 @@
         <div>
           <p class="hello">Les carnets d'</p>
           <h1>Hortense</h1>
-          <p class="moi" id="moi" hidden><span id="moi-nom"></span> · <button type="button" class="link" id="moi-changer">changer</button><button type="button" class="link demo-lien" id="demo-ouvrir" hidden>🧸 démo</button> <span class="moi-version" id="moi-version"></span></p>
+          <p class="moi" id="moi" hidden><span id="moi-nom"></span> · <button type="button" class="link" id="reglages-ouvrir">⚙️ réglages</button> <span class="moi-version" id="moi-version"></span></p>
           <p class="sync-badge" id="sync-badge" hidden></p>
         </div>
       </div>
@@ -630,15 +656,11 @@
         </section>
       </div>
 
-      <!-- ================= GARDE (micro-crèche, grands-parents) ================= -->
+      <!-- ================= GARDE (grands-parents) ================= -->
       <div class="page" id="page-garde" role="tabpanel" aria-label="Garde">
         <section class="card whoami" id="g-whoami">
           <div class="who-set">
             <span class="who-name" id="g-who-name"></span>
-          </div>
-          <div class="chips garde-choix" id="g-garde-choix" role="radiogroup" aria-label="Gardée par" hidden>
-            <button type="button" class="chip" role="radio" data-garde="Micro-crèche">🏡 Micro-crèche</button>
-            <button type="button" class="chip" role="radio" data-garde="Grands-parents">👵 Grands-parents</button>
           </div>
         </section>
 
@@ -758,6 +780,49 @@
     </form>
   </dialog>
 
+  <!-- Réglages : changer de profil, comptes (parents), mode découverte -->
+  <dialog class="sheet" id="reglages" aria-labelledby="reglages-titre">
+    <form method="dialog">
+      <p class="sheet-title" id="reglages-titre">⚙️ Réglages</p>
+      <div class="reglages-liste">
+        <button type="button" class="who-btn" id="comptes-ouvrir" hidden><span class="emoji" aria-hidden="true">🔐</span><span>Gérer les comptes</span></button>
+        <button type="button" class="who-btn" id="demo-ouvrir" hidden><span class="emoji" aria-hidden="true">🧸</span><span>Mode découverte</span></button>
+        <button type="button" class="who-btn" id="moi-changer"><span class="emoji" aria-hidden="true">↩️</span><span>Changer de profil</span></button>
+      </div>
+      <div class="sheet-actions">
+        <button type="submit" value="ok" class="link">Fermer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Gérer les comptes (parents) : 1 compte Parents, 1 compte Grands-parents -->
+  <dialog class="sheet" id="comptes" aria-labelledby="comptes-titre">
+    <form method="dialog" id="comptes-form">
+      <p class="sheet-title" id="comptes-titre">🔐 Les comptes</p>
+      <p class="hint">Deux comptes seulement : chacun a son mot de passe, à donner à la bonne personne.</p>
+      <div class="compte-ligne">
+        <span class="compte-nom">👨‍👩‍👧 Parents</span>
+        <span class="compte-droits">Accès à tout</span>
+        <button type="button" class="g-btn" data-compte="parents">Changer le mot de passe</button>
+      </div>
+      <div class="compte-ligne">
+        <span class="compte-nom">👵 Grands-parents</span>
+        <span class="compte-droits">Garde et Santé seulement</span>
+        <button type="button" class="g-btn alt" data-compte="famille">Changer le mot de passe</button>
+      </div>
+      <div class="compte-mdp" id="compte-mdp" hidden>
+        <p class="label" id="compte-mdp-titre"></p>
+        <label class="field wide"><span>Nouveau mot de passe (8 caractères minimum)</span><input type="password" id="compte-mdp1" autocomplete="new-password"></label>
+        <label class="field wide"><span>Le retaper</span><input type="password" id="compte-mdp2" autocomplete="new-password"></label>
+        <button type="button" class="g-btn" id="compte-valider">Enregistrer le mot de passe</button>
+      </div>
+      <p class="login-erreur" id="compte-message" role="status"></p>
+      <div class="sheet-actions">
+        <button type="submit" value="ok" class="link">Fermer</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Mode découverte -->
   <dialog class="sheet" id="demo-dialog" aria-labelledby="demo-titre">
     <form method="dialog">
@@ -799,22 +864,23 @@
   </dialog>
 
 
-  <script src="scene.js?v=3"></script>
+  <script src="scene.js?v=4"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="config.js?v=3"></script>
-  <script src="commun.js?v=3"></script>
-  <script src="demo.js?v=3"></script>
-  <script src="auth.js?v=3"></script>
-  <script src="repas.js?v=3"></script>
-  <script src="couches.js?v=3"></script>
-  <script src="sommeil.js?v=3"></script>
-  <script src="sante.js?v=3"></script>
-  <script src="medicaments.js?v=3"></script>
-  <script src="garde.js?v=3"></script>
-  <script src="graphiques.js?v=3"></script>
-  <script src="fetes.js?v=3"></script>
-  <script src="notifs.js?v=3"></script>
-  <script src="tuto.js?v=3"></script>
-  <script src="pages.js?v=3"></script>
+  <script src="config.js?v=4"></script>
+  <script src="commun.js?v=4"></script>
+  <script src="demo.js?v=4"></script>
+  <script src="auth.js?v=4"></script>
+  <script src="repas.js?v=4"></script>
+  <script src="couches.js?v=4"></script>
+  <script src="sommeil.js?v=4"></script>
+  <script src="sante.js?v=4"></script>
+  <script src="medicaments.js?v=4"></script>
+  <script src="garde.js?v=4"></script>
+  <script src="graphiques.js?v=4"></script>
+  <script src="fetes.js?v=4"></script>
+  <script src="notifs.js?v=4"></script>
+  <script src="comptes.js?v=4"></script>
+  <script src="tuto.js?v=4"></script>
+  <script src="pages.js?v=4"></script>
 </body>
 </html>
