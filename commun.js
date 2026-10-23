@@ -9,7 +9,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const $ = (id) => document.getElementById(id);
 
 // Version de l'appli : quand elle change sur le serveur, les téléphones se mettent à jour tout seuls
-const VERSION_APPLI = "5";
+const VERSION_APPLI = "6";
 
 // Jeton de connexion (fourni par auth.js une fois le profil connecté)
 let obtenirJeton = async () => null;
@@ -141,12 +141,14 @@ async function ouvrirDiagnostic() {
 }
 document.addEventListener("click", (e) => {
   if (e.target.closest("#sync-badge")) ouvrirDiagnostic();
-  if (e.target.closest("#diag-vider") && confirm("Effacer les ajouts en attente ? Ils ne seront jamais envoyés.")) {
-    ecrire(FILE, []);
-    $("diag").close();
-    majBadgeAttente();
-    toast("File d'attente vidée");
-  }
+  if (e.target.closest("#diag-vider"))
+    demanderConfirmation("Effacer les ajouts en attente ? Ils ne seront jamais envoyés.", "Effacer").then((ok) => {
+      if (!ok) return;
+      ecrire(FILE, []);
+      $("diag").close();
+      majBadgeAttente();
+      toast("File d'attente vidée");
+    });
 });
 
 async function entetes(extra = {}) {
@@ -276,6 +278,18 @@ function toast(msg) {
   t.hidden = false;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => (t.hidden = true), 2200);
+}
+
+// Petite fenêtre « Oui / Annuler » de l'appli (la fenêtre confirm() du navigateur peut être bloquée)
+function demanderConfirmation(texte, oui = "Oui") {
+  const d = $("confirmer");
+  $("confirmer-texte").textContent = texte;
+  $("confirmer-oui").textContent = oui;
+  d.returnValue = "non";
+  return new Promise((r) => {
+    d.addEventListener("close", () => r(d.returnValue === "oui"), { once: true });
+    d.showModal();
+  });
 }
 
 function animerBouton(btn) {

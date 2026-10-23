@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -823,6 +823,17 @@
     </form>
   </dialog>
 
+  <!-- Confirmation (remplace la fenêtre du navigateur, parfois bloquée dans les applis installées) -->
+  <dialog class="sheet" id="confirmer" aria-labelledby="confirmer-texte">
+    <form method="dialog">
+      <p class="sheet-title" id="confirmer-texte"></p>
+      <div class="sheet-actions">
+        <button type="submit" value="oui" class="g-btn" id="confirmer-oui">Oui</button>
+        <button type="submit" value="non" class="link">Annuler</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Mode découverte -->
   <dialog class="sheet" id="demo-dialog" aria-labelledby="demo-titre">
     <form method="dialog">
@@ -864,23 +875,23 @@
   </dialog>
 
 
-  <script src="scene.js?v=5"></script>
+  <script src="scene.js?v=6"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="config.js?v=5"></script>
-  <script src="commun.js?v=5"></script>
-  <script src="demo.js?v=5"></script>
-  <script src="auth.js?v=5"></script>
-  <script src="repas.js?v=5"></script>
-  <script src="couches.js?v=5"></script>
-  <script src="sommeil.js?v=5"></script>
-  <script src="sante.js?v=5"></script>
-  <script src="medicaments.js?v=5"></script>
-  <script src="garde.js?v=5"></script>
-  <script src="graphiques.js?v=5"></script>
-  <script src="fetes.js?v=5"></script>
-  <script src="notifs.js?v=5"></script>
-  <script src="comptes.js?v=5"></script>
-  <script src="tuto.js?v=5"></script>
-  <script src="pages.js?v=5"></script>
+  <script src="config.js?v=6"></script>
+  <script src="commun.js?v=6"></script>
+  <script src="demo.js?v=6"></script>
+  <script src="auth.js?v=6"></script>
+  <script src="repas.js?v=6"></script>
+  <script src="couches.js?v=6"></script>
+  <script src="sommeil.js?v=6"></script>
+  <script src="sante.js?v=6"></script>
+  <script src="medicaments.js?v=6"></script>
+  <script src="garde.js?v=6"></script>
+  <script src="graphiques.js?v=6"></script>
+  <script src="fetes.js?v=6"></script>
+  <script src="notifs.js?v=6"></script>
+  <script src="comptes.js?v=6"></script>
+  <script src="tuto.js?v=6"></script>
+  <script src="pages.js?v=6"></script>
 </body>
 </html>

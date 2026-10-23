@@ -138,7 +138,7 @@ const connexionPrete = new Promise((r) => (resoudreConnexion = r));
   }
 
   async function seDeconnecter() {
-    if (!confirm("Changer de profil ? Il faudra retaper le mot de passe.")) return;
+    if (!(await demanderConfirmation("Changer de profil ? Il faudra retaper le mot de passe.", "Changer"))) return;
     try {
       await sb?.auth.signOut();
     } catch (e) {}

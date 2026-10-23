@@ -271,8 +271,8 @@
     window.demo.remplirExemple();
     $("demo-dialog").close();
   });
-  $("demo-effacer").addEventListener("click", () => {
-    if (!confirm("Effacer tout ce qui a été noté sur ce téléphone ?")) return;
+  $("demo-effacer").addEventListener("click", async () => {
+    if (!(await demanderConfirmation("Effacer tout ce qui a été noté sur ce téléphone ?", "Effacer"))) return;
     window.demo.toutEffacer();
     $("demo-dialog").close();
   });
