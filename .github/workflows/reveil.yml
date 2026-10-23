@@ -1,0 +1,29 @@
+# Réveil automatique : la base gratuite Supabase se met en pause après ~7 jours sans activité.
+# Ce petit robot lui demande juste l'heure deux fois par semaine (aucune donnée lue ni écrite).
+name: Réveil de la base
+on:
+  schedule:
+    - cron: "17 7 * * 1,4"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  reveil:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Toquer à la base
+        run: |
+          curl -fsS -X POST "https://mpfuvjdqembcnndgbsnm.supabase.co/rest/v1/rpc/reveil" \
+            -H "apikey: sb_publishable_lATsCwwa3QbB-piVnwwnaA_9m7MRKMe" -H "Content-Type: application/json" -d '{}'
+      # GitHub coupe les robots d'un dépôt sans nouveauté depuis 60 jours : une petite note par mois l'en empêche
+      - uses: actions/checkout@v4
+      - name: Note mensuelle
+        run: |
+          if [ $(( $(date +%s) - $(git log -1 --format=%ct) )) -gt 2592000 ]; then
+            date -u +%F > .github/dernier-reveil.txt
+            git config user.name "reveil-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .github/dernier-reveil.txt
+            git commit -m "Réveil mensuel"
+            git push
+          fi
