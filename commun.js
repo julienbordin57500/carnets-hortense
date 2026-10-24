@@ -9,7 +9,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const $ = (id) => document.getElementById(id);
 
 // Version de l'appli : quand elle change sur le serveur, les téléphones se mettent à jour tout seuls
-const VERSION_APPLI = "9";
+const VERSION_APPLI = "10";
 
 // Jeton de connexion (fourni par auth.js une fois le profil connecté)
 let obtenirJeton = async () => null;
@@ -401,6 +401,9 @@ const contenuChange = () => window.dispatchEvent(new Event("contenu-change"));
 // Échappe un texte saisi avant de l'insérer dans du HTML
 const esc = (t) =>
   String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+// Petite étiquette « 👵 par Mamou » sur ce que les grands-parents ont noté (recopié depuis la page Garde)
+const parGardien = (x) => (x && x.gardien ? `<span class="h-par">👵 par ${esc(x.gardien)}</span>` : "");
 
 // ---------- Fenêtre de modification ----------
 // champs : [{ cle, label, type: "time" | "select" | "check", valeur, options: [[valeur, libellé], …] }]

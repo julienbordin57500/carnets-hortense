@@ -1,7 +1,7 @@
 // Page Sommeil : « il s'endort » démarre le minuteur, « il se réveille » l'arrête
 (() => {
   const TABLE = "sommeils";
-  const COLONNES = "id,debut,fin";
+  const COLONNES = "id,debut,fin,gardien";
 
   let sommeils = []; // dodos qui touchent les dernières 24 h (y compris celui en cours)
   let enCours = null; // dodo sans heure de réveil
@@ -148,7 +148,7 @@
     li.innerHTML = `
       <span class="h-emoji" aria-hidden="true">${s.fin ? "😴" : "💤"}</span>
       <span class="h-time">${fmtHeure(s.debut)}</span>
-      <span class="h-info"><span class="h-type">→ ${fin}</span><span class="h-det">${duree}</span></span>`;
+      <span class="h-info"><span class="h-type">→ ${fin}</span><span class="h-det">${duree}</span>${parGardien(s)}</span>`;
     li.append(boutonSupprimer(`Supprimer le dodo de ${fmtHeure(s.debut)}`, () => supprimer(s.id)));
     rendreModifiable(li, () => modifier(s));
     return li;

@@ -1,7 +1,7 @@
 // Page Couches : quand la couche a été changée, pipi, caca et taille du caca
 (() => {
   const TABLE = "couches";
-  const COLONNES = "id,change_le,pipi,caca,caca_taille";
+  const COLONNES = "id,change_le,pipi,caca,caca_taille,gardien";
   const TAILLES = ["petit", "moyen", "gros"];
   const WARN_MS = 3 * 60 * 60 * 1000;
   const LATE_MS = 4 * 60 * 60 * 1000;
@@ -135,7 +135,7 @@
     li.innerHTML = `
       <span class="h-emoji" aria-hidden="true">${emoji(c)}</span>
       <span class="h-time">${fmtHeure(c.change_le)}</span>
-      <span class="h-info"><span class="h-type">${contenu(c)}</span></span>
+      <span class="h-info"><span class="h-type">${contenu(c)}</span>${parGardien(c)}</span>
       <span class="h-ago">${fmtIlYa(Date.now() - new Date(c.change_le).getTime())}</span>`;
     li.append(boutonSupprimer(`Supprimer la couche de ${fmtHeure(c.change_le)}`, () => supprimer(c.id)));
     rendreModifiable(li, () => modifier(c));
