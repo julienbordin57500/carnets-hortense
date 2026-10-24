@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -666,9 +666,11 @@
 
         <!-- Résumé pour les grands-parents : l'essentiel noté par tout le monde, sans le détail -->
         <section class="card resume-maison" id="g-resume" hidden>
-          <p class="resume-titre">🏠 Les dernières nouvelles</p>
-          <ul class="resume-liste" id="g-resume-liste" aria-live="polite"></ul>
-          <p class="hint small" id="g-resume-maj"></p>
+          <div class="resume-tete">
+            <p class="resume-titre"><span aria-hidden="true">🏠</span> Les dernières nouvelles</p>
+            <span class="resume-maj" id="g-resume-maj"></span>
+          </div>
+          <div class="resume-grille" id="g-resume-liste" aria-live="polite"></div>
         </section>
 
         <section class="card garde-day">
@@ -883,24 +885,24 @@
   </dialog>
 
 
-  <script src="scene.js?v=8"></script>
+  <script src="scene.js?v=9"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="config.js?v=8"></script>
-  <script src="commun.js?v=8"></script>
-  <script src="demo.js?v=8"></script>
-  <script src="auth.js?v=8"></script>
-  <script src="repas.js?v=8"></script>
-  <script src="couches.js?v=8"></script>
-  <script src="sommeil.js?v=8"></script>
-  <script src="sante.js?v=8"></script>
-  <script src="medicaments.js?v=8"></script>
-  <script src="resume.js?v=8"></script>
-  <script src="garde.js?v=8"></script>
-  <script src="graphiques.js?v=8"></script>
-  <script src="fetes.js?v=8"></script>
-  <script src="notifs.js?v=8"></script>
-  <script src="comptes.js?v=8"></script>
-  <script src="tuto.js?v=8"></script>
-  <script src="pages.js?v=8"></script>
+  <script src="config.js?v=9"></script>
+  <script src="commun.js?v=9"></script>
+  <script src="demo.js?v=9"></script>
+  <script src="auth.js?v=9"></script>
+  <script src="repas.js?v=9"></script>
+  <script src="couches.js?v=9"></script>
+  <script src="sommeil.js?v=9"></script>
+  <script src="sante.js?v=9"></script>
+  <script src="medicaments.js?v=9"></script>
+  <script src="resume.js?v=9"></script>
+  <script src="garde.js?v=9"></script>
+  <script src="graphiques.js?v=9"></script>
+  <script src="fetes.js?v=9"></script>
+  <script src="notifs.js?v=9"></script>
+  <script src="comptes.js?v=9"></script>
+  <script src="tuto.js?v=9"></script>
+  <script src="pages.js?v=9"></script>
 </body>
 </html>
