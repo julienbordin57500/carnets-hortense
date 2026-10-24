@@ -1185,3 +1185,14 @@ dialog.sheet::backdrop { touch-action: none; }
 /* Menu « réglages » */
 .reglages-liste { display: flex; flex-direction: column; gap: 8px; }
 .reglages-liste .who-btn { justify-content: flex-start; padding-left: 16px; }
+
+/* Message « heure incomplète » de la fenêtre Modifier : rien tant qu'il est vide */
+#edit-erreur { text-align: center; font-size: .95rem; }
+#edit-erreur:empty { display: none; }
+
+/* Résumé pour les grands-parents (page Garde) */
+.resume-titre { margin: 0 0 6px; font-weight: 700; font-size: 1.1rem; }
+.resume-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.resume-liste li { display: flex; gap: 10px; align-items: flex-start; line-height: 1.35; }
+.resume-emoji { font-size: 1.25rem; line-height: 1.1; }
+#g-resume-maj { margin: 8px 0 0; }

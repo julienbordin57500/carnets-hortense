@@ -126,12 +126,44 @@
       headers: { "Content-Type": "application/json", ...entetes },
     });
 
+  // Même calcul que la fonction resume_famille() de la vraie base
+  function resumeFamille(t) {
+    const debutJour = new Date();
+    debutJour.setHours(0, 0, 0, 0);
+    const maintenantMs = Date.now();
+    const repas = [
+      ...t.biberons.map((b) => ({ quand: b.pris_le, type: b.type, ml: b.quantite_ml, lait: b.lait, duree_min: b.duree_min, ou: "maison" })),
+      ...t.garde_evenements.filter((g) => g.type === "repas").map((g) => ({ quand: g.quand, type: "biberon", ml: g.ml, lait: g.lait, duree_min: null, ou: "garde" })),
+    ];
+    const couches = [
+      ...t.couches.map((c) => ({ quand: c.change_le, pipi: c.pipi, caca: c.caca, ou: "maison" })),
+      ...t.garde_evenements.filter((g) => g.type === "couche").map((g) => ({ quand: g.quand, pipi: !!g.pipi, caca: !!g.caca, ou: "garde" })),
+    ];
+    const dodos = [...t.sommeils.map((s) => ({ debut: s.debut, fin: s.fin })), ...t.garde_evenements.filter((g) => g.type === "sommeil").map((g) => ({ debut: g.quand, fin: g.fin }))];
+    const dernier = (l) => l.slice().sort((a, b) => new Date(b.quand) - new Date(a.quand))[0] || null;
+    const max = (l) => (l.length ? l.reduce((a, b) => (new Date(b) > new Date(a) ? b : a)) : null);
+    const minutes = dodos.reduce((tot, d) => {
+      const fin = Math.min(d.fin ? new Date(d.fin).getTime() : maintenantMs, maintenantMs);
+      const debut = Math.max(new Date(d.debut).getTime(), debutJour.getTime());
+      return tot + Math.max(0, fin - debut);
+    }, 0) / 60000;
+    return {
+      dernier_repas: dernier(repas),
+      derniere_couche: dernier(couches),
+      dernier_caca_aujourdhui: max(couches.filter((c) => c.caca && new Date(c.quand) >= debutJour).map((c) => c.quand)),
+      sommeil_aujourdhui_min: Math.round(minutes),
+      dort_depuis: max(dodos.filter((d) => !d.fin).map((d) => d.debut)),
+      dernier_reveil: max(dodos.filter((d) => d.fin).map((d) => d.fin)),
+    };
+  }
+
   // ---------- Traitement d'une demande ----------
   function traiter(url, options = {}) {
     const methode = (options.method || "GET").toUpperCase();
     const u = new URL(url);
     const chemin = u.pathname.replace(/^\/rest\/v1\/?/, "");
     if (!chemin) return reponse({}); // vérification « le serveur répond-il ? »
+    if (chemin === "rpc/resume_famille") return reponse(resumeFamille(charger().tables));
     const table = chemin.split("/")[0];
     if (!DEFAUTS[table]) return reponse({ message: "table inconnue" }, 404);
     const base = charger();

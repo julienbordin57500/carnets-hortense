@@ -31,6 +31,7 @@
 
   async function charger() {
     suivreProfil();
+    window.chargerResume?.();
     const fin = new Date(jour);
     fin.setDate(fin.getDate() + 1);
     try {
