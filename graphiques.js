@@ -113,6 +113,9 @@
     svg.push(`</svg>`);
 
     const el = $(`chart-${cle}`);
+    // Les barres poussent depuis le bas la première fois seulement (pas à chaque rafraîchissement)
+    el.classList.toggle("pousse", !el.dataset.vu);
+    el.dataset.vu = "1";
     el.innerHTML = svg.join("");
     el.setAttribute(
       "aria-label",

@@ -172,7 +172,35 @@
       li.append(ok);
     }
     li.append(boutonSupprimer(`Supprimer le rendez-vous du ${fmtDate(r.quand)}`, () => supprimerRdv(r.id)));
+    rendreModifiable(li, () => modifierRdv(r));
     return li;
+  }
+
+  // Toucher un rendez-vous : changer la date, l'heure, le type, le lieu, les questions à poser…
+  async function modifierRdv(r) {
+    const d = new Date(r.quand);
+    const v = await editer(`${(RDV_TYPES[r.type] || RDV_TYPES.autre).emoji} Modifier le rendez-vous`, [
+      { cle: "date", label: "Date", type: "date", valeur: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` },
+      { cle: "heure", label: "Heure", type: "time", valeur: hhmm(r.quand) },
+      { cle: "type", label: "Type", type: "select", valeur: r.type, options: Object.keys(RDV_TYPES).map((k) => [k, `${RDV_TYPES[k].emoji} ${RDV_TYPES[k].nom}`]) },
+      { cle: "titre", label: "Titre", type: "text", valeur: r.titre },
+      { cle: "lieu", label: "Lieu", type: "text", valeur: r.lieu },
+      { cle: "notes", label: "Questions à poser, notes", type: "textarea", valeur: r.notes, placeholder: "Une question par ligne…" },
+      { cle: "fait", label: "✅ Rendez-vous fait", type: "check", valeur: r.fait },
+    ]);
+    if (!v) return;
+    const [a, m, j] = (v.date || "").split("-").map(Number);
+    const [h, mi] = (v.heure || hhmm(r.quand)).split(":").map(Number);
+    const quand = a ? new Date(a, m - 1, j, h, mi) : d;
+    await majRdv(r.id, {
+      quand: quand.toISOString(),
+      type: v.type || "autre",
+      titre: v.titre ? v.titre.slice(0, 120) : null,
+      lieu: v.lieu ? v.lieu.slice(0, 200) : null,
+      notes: v.notes ? v.notes.slice(0, 1000) : null,
+      fait: v.fait,
+    });
+    toast("✏️ Rendez-vous modifié");
   }
 
   function rendreRdvs() {

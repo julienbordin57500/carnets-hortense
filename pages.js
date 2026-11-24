@@ -26,6 +26,7 @@
     actuelle = Math.max(0, Math.min(i, pages().length - 1));
     surligner(actuelle);
     ecrire("page-id", pages()[actuelle]?.id);
+    window.dispatchEvent(new CustomEvent("page-vue", { detail: pages()[actuelle]?.id }));
     ajusterHauteur();
   }
 

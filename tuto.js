@@ -14,12 +14,12 @@
     {
       emoji: "🍼",
       titre: "Un appui quand ça arrive",
-      texte: "« + Biberon » pour un repas, « + 💧 » ou « + 💩 » pour une couche. Pour la sieste : « Elle s'endort » puis « Elle se réveille », ou ajoutez-la plus tard avec les heures. Pour effacer une erreur, touchez-la deux fois.",
+      texte: "En haut, 3 gros boutons : 🍼 Biberon (vous choisissez combien elle a bu), 👶 Couche (pipi, caca ou les deux) et 🌙 Elle s'endort. Quand elle dort, un grand bandeau jaune apparaît : touchez-le à son réveil. Une erreur ? Touchez la ligne pour changer l'heure ou l'effacer.",
     },
     {
       emoji: "📝",
       titre: "La note du jour",
-      texte: "Écrivez ce que vous avez fait, comment elle était, puis « Enregistrer ma note ». Les parents la liront.",
+      texte: "« 📝 Un mot pour les parents » : écrivez ce que vous avez fait, comment elle était, puis Enregistrer. Les parents le liront sur leur téléphone.",
     },
     {
       emoji: "💊",

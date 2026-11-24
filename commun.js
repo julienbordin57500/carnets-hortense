@@ -9,7 +9,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const $ = (id) => document.getElementById(id);
 
 // Version de l'appli : quand elle change sur le serveur, les téléphones se mettent à jour tout seuls
-const VERSION_APPLI = "11";
+const VERSION_APPLI = "12";
 
 // Jeton de connexion (fourni par auth.js une fois le profil connecté)
 let obtenirJeton = async () => null;
@@ -272,12 +272,30 @@ function afficherErreur(msg) {
 }
 
 let toastTimer;
-function toast(msg) {
+function toast(msg, annuler) {
   const t = $("toast");
   t.textContent = msg;
+  // Petit bouton « Annuler » pendant 5 secondes (un appui en trop se corrige tout de suite)
+  if (annuler) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "toast-annuler";
+    b.textContent = "Annuler";
+    b.addEventListener("click", async () => {
+      t.hidden = true;
+      try {
+        await annuler();
+        toast("↩️ Annulé");
+      } catch (e) {
+        afficherErreur("Impossible d'annuler. Supprime-le dans la liste.");
+      }
+    });
+    t.append(" ", b);
+  }
+  t.classList.toggle("avec-action", !!annuler);
   t.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => (t.hidden = true), 2200);
+  toastTimer = setTimeout(() => (t.hidden = true), annuler ? 5000 : 2200);
 }
 
 // Petite fenêtre « Oui / Annuler » de l'appli (la fenêtre confirm() du navigateur peut être bloquée)
@@ -292,10 +310,83 @@ function demanderConfirmation(texte, oui = "Oui") {
   });
 }
 
+// Ajoute une ligne et renvoie son id (null si elle part dans la file d'attente hors ligne)
+async function ajouterLigne(table, ligne) {
+  const r = await api(table, "", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify(ligne) });
+  return Array.isArray(r) && r[0] ? r[0].id : null;
+}
+// Retire une ligne qu'on vient d'ajouter (bouton « Annuler ») puis recharge les pages
+const annulerAjout = (table, id) =>
+  id
+    ? async () => {
+        await api(table, `?id=eq.${id}`, { method: "DELETE" });
+        await rechargerTout();
+      }
+    : null;
+
+// « Tu viens déjà de noter… » : Non, c'était en trop / Oui, en ajouter un autre
+function demanderDoublon(message) {
+  return new Promise((ok) => {
+    const d = $("g-doublon");
+    $("g-doublon-texte").textContent = message;
+    d.onclose = () => ok(d.returnValue === "oui");
+    d.returnValue = "";
+    d.showModal();
+  });
+}
+// Même chose notée il y a moins de 5 minutes (et l'heure n'a pas été changée à la main)
+const recemment = (date) => Math.abs(Date.now() - new Date(date).getTime()) < 5 * 60000;
+
+// C'est noté : petite vibration (Android ; l'iPhone ne le permet pas), rebond et coche verte
 function animerBouton(btn) {
+  if (!btn) return;
+  try {
+    navigator.vibrate?.(35);
+  } catch (e) {}
   btn.classList.remove("pop");
   void btn.offsetWidth;
   btn.classList.add("pop");
+  btn.querySelector(".coche-ok")?.remove();
+  const coche = document.createElement("span");
+  coche.className = "coche-ok";
+  coche.setAttribute("aria-hidden", "true");
+  coche.textContent = "✓";
+  btn.append(coche);
+  setTimeout(() => coche.remove(), 1100);
+}
+
+// Listes du jour : un petit titre « ☀️ Matin », « 🌤️ Après-midi », « 🌆 Soirée », « 🌙 Nuit »
+// chaque fois qu'on change de moment (la nuit de 22 h à 6 h compte pour un seul bloc)
+const MOMENTS = [
+  [6, "☀️ Matin"],
+  [12, "🌤️ Après-midi"],
+  [18, "🌆 Soirée"],
+  [22, "🌙 Nuit"],
+];
+function avecMoments(liste, dateDe, creerLigne) {
+  const noeuds = [];
+  let avant = null;
+  liste.forEach((x) => {
+    const d = new Date(dateDe(x));
+    const h = d.getHours();
+    // La nuit après minuit appartient à la soirée de la veille
+    const jour = new Date(d.getFullYear(), d.getMonth(), d.getDate() - (h < 6 ? 1 : 0));
+    const i = h < 6 ? 3 : MOMENTS.findLastIndex(([debut]) => h >= debut);
+    const cle = `${jour.toDateString()}-${i}`;
+    if (cle !== avant) {
+      const li = document.createElement("li");
+      li.className = "h-moment";
+      li.setAttribute("aria-hidden", "true");
+      const hier = new Date(minuit().getTime() - 86400000).toDateString() === jour.toDateString();
+      const aujourdhui = minuit().toDateString() === jour.toDateString();
+      // La nuit qui a commencé hier soir, c'est « cette nuit »
+      li.textContent = i === 3 && hier ? "🌙 Cette nuit" : MOMENTS[i][1] + (aujourdhui ? "" : " · hier");
+      noeuds.push(li);
+      avant = cle;
+    }
+    noeuds.push(creerLigne(x));
+  });
+  return noeuds;
 }
 
 // Bouton ✕ : deux appuis pour supprimer, pour éviter les erreurs
@@ -380,6 +471,72 @@ const rechargerTout = () => Promise.all(rubriques.map((r) => r.charger()));
 
 // La nuit, pour l'appli : de 23 h à 7 h
 const estLaNuit = (d = new Date()) => d.getHours() >= 23 || d.getHours() < 7;
+// Le décor suit l'heure (vérifié chaque minute) :
+// aube rosée 6 h – 9 h, coucher de soleil 17 h – 20 h, crépuscule 20 h – 22 h,
+// mode nuit doux 22 h – 6 h (couleurs sombres et chaudes), l'ourson bâille de 19 h à 23 h
+function majNuitDouce() {
+  const h = new Date().getHours();
+  const c = document.documentElement.classList;
+  c.toggle("nuit-douce", h >= 22 || h < 6);
+  c.toggle("ciel-aube", h >= 6 && h < 9);
+  c.toggle("ciel-couchant", h >= 17 && h < 20);
+  c.toggle("ciel-crepuscule", h >= 20 && h < 22);
+  c.toggle("soir", h >= 19 && h < 23);
+}
+majNuitDouce();
+setInterval(majNuitDouce, 60 * 1000);
+
+// Les totaux (nombre de repas, de couches…) défilent jusqu'à leur nouvelle valeur
+(() => {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const connus = new WeakMap();
+  const enCours = new WeakSet();
+  function defiler(el, de, a) {
+    enCours.add(el);
+    const debut = performance.now();
+    const duree = Math.min(900, 250 + Math.abs(a - de) * 60);
+    (function image(t) {
+      const p = Math.min(1, (t - debut) / duree);
+      const v = Math.round(de + (a - de) * (1 - Math.pow(1 - p, 3)));
+      el.textContent = String(v);
+      if (p < 1) requestAnimationFrame(image);
+      else {
+        el.textContent = String(a);
+        connus.set(el, a);
+        queueMicrotask(() => enCours.delete(el));
+      }
+    })(debut);
+  }
+  const obs = new MutationObserver((changes) => {
+    new Set(changes.map((m) => (m.target.nodeType === 3 ? m.target.parentElement : m.target))).forEach((el) => {
+      if (!el || enCours.has(el)) return;
+      const n = Number(el.textContent);
+      const avant = connus.get(el) ?? 0;
+      if (!Number.isInteger(n) || n === avant) return connus.set(el, n);
+      el.textContent = String(avant); // repart de l'ancienne valeur
+      defiler(el, avant, n);
+    });
+  });
+  document.querySelectorAll('[id$="-count"]').forEach((el) => {
+    connus.set(el, 0);
+    obs.observe(el, { childList: true, characterData: true, subtree: true });
+  });
+})();
+
+// En arrivant sur une page, ses cartes glissent doucement en place l'une après l'autre
+let derniereVue = null;
+window.addEventListener("page-vue", (e) => {
+  if (e.detail === derniereVue) return;
+  derniereVue = e.detail;
+  const page = $(e.detail);
+  if (!page || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  [...page.querySelectorAll(":scope > section, :scope > .card")].filter((c) => !c.hidden).slice(0, 8).forEach((c, i) => {
+    c.classList.remove("arrive");
+    void c.offsetWidth;
+    c.style.animationDelay = `${i * 60}ms`;
+    c.classList.add("arrive");
+  });
+});
 async function demarrerRafraichissement() {
   await connexionPrete; // fourni par auth.js
   const toutCharger = () => {
@@ -427,6 +584,80 @@ function editer(titre, champs) {
           input.append(o);
         });
         input.value = c.valeur === null || c.valeur === undefined ? "" : String(c.valeur);
+      } else if (c.type === "date") {
+        // Date en trois menus (jour, mois, année) plutôt que le calendrier d'Apple (même souci que la roue d'heure)
+        input = document.createElement("input");
+        input.type = "hidden";
+        input.value = c.valeur || "";
+        const [a0, m0, j0] = (c.valeur || "").split("-");
+        const an = new Date().getFullYear();
+        const menu = (options, valeur, nom) => {
+          const sel = document.createElement("select");
+          sel.setAttribute("aria-label", nom);
+          options.forEach(([v, l]) => {
+            const o = document.createElement("option");
+            o.value = v;
+            o.textContent = l;
+            sel.append(o);
+          });
+          sel.value = valeur;
+          return sel;
+        };
+        const MOIS = ["janv.", "févr.", "mars", "avril", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+        const jours = menu(Array.from({ length: 31 }, (_, i) => [pad(i + 1), String(i + 1)]), j0, "Jour");
+        const mois = menu(MOIS.map((m, i) => [pad(i + 1), m]), m0, "Mois");
+        const annees = [...new Set([Number(a0) || an, an - 1, an, an + 1, an + 2])].sort();
+        const annee = menu(annees.map((a) => [String(a), String(a)]), a0 || String(an), "Année");
+        const maj = () => {
+          // 31 février → dernier jour du mois
+          const dernier = new Date(Number(annee.value), Number(mois.value), 0).getDate();
+          if (Number(jours.value) > dernier) jours.value = pad(dernier);
+          input.value = `${annee.value}-${mois.value}-${jours.value}`;
+        };
+        [jours, mois, annee].forEach((s) => s.addEventListener("change", maj));
+        const boite = document.createElement("span");
+        boite.className = "heure-menus date-menus";
+        boite.append(jours, mois, annee);
+        input.dataset.cle = c.cle;
+        label.append(span, boite, input);
+        return label;
+      } else if (c.type === "textarea") {
+        input = document.createElement("textarea");
+        input.rows = 4;
+        input.maxLength = c.max || 1000;
+        if (c.placeholder) input.placeholder = c.placeholder;
+        input.value = c.valeur || "";
+      } else if (c.type === "time") {
+        // Heure en deux menus (heures, minutes) plutôt que la roue d'Apple :
+        // dans cette fenêtre, la roue bloquait voire faisait planter certains iPhone (iOS 26)
+        input = document.createElement("input");
+        input.type = "hidden";
+        input.value = c.valeur || "";
+        const [h0, m0] = (c.valeur || "00:00").split(":");
+        const menu = (max, valeur, nom) => {
+          const sel = document.createElement("select");
+          sel.setAttribute("aria-label", nom);
+          for (let i = 0; i < max; i++) {
+            const o = document.createElement("option");
+            o.value = o.textContent = pad(i);
+            sel.append(o);
+          }
+          sel.value = valeur;
+          return sel;
+        };
+        const heures = menu(24, h0, "Heures");
+        const minutes = menu(60, m0, "Minutes");
+        const maj = () => (input.value = `${heures.value}:${minutes.value}`);
+        heures.addEventListener("change", maj);
+        minutes.addEventListener("change", maj);
+        const boite = document.createElement("span");
+        boite.className = "heure-menus";
+        const deuxPoints = document.createElement("span");
+        deuxPoints.textContent = ":";
+        boite.append(heures, deuxPoints, minutes);
+        input.dataset.cle = c.cle;
+        label.append(span, boite, input);
+        return label;
       } else {
         input = document.createElement("input");
         input.type = c.type === "check" ? "checkbox" : c.type;
@@ -449,7 +680,7 @@ function editer(titre, champs) {
         if (!valide) return resolve(null);
         const r = {};
         $("edit-fields").querySelectorAll("[data-cle]").forEach((el) => {
-          r[el.dataset.cle] = el.type === "checkbox" ? el.checked : el.value === "" ? null : el.value;
+          r[el.dataset.cle] = el.type === "checkbox" ? el.checked : el.value.trim() === "" ? null : el.value.trim();
         });
         resolve(r);
       },
@@ -554,3 +785,59 @@ setTimeout(verifierMiseAJour, 3000);
     this.addEventListener("close", debloquer, { once: true });
   };
 })();
+
+// Une ligne recopiée depuis la garde se modifie à la source (garde_evenements) :
+// sinon la prochaine modification des grands-parents effacerait la correction des parents.
+// « champs » : { colonne du carnet: colonne de la garde }
+async function modifierLigne(table, ligne, maj, champs = {}) {
+  if (!ligne.garde_id) return api(table, `?id=eq.${ligne.id}`, { method: "PATCH", body: JSON.stringify(maj) });
+  const source = {};
+  const reste = {};
+  Object.entries(maj).forEach(([k, v]) => (k in champs ? (source[champs[k]] = v) : (reste[k] = v)));
+  if (Object.keys(source).length) await api("garde_evenements", `?id=eq.${ligne.garde_id}`, { method: "PATCH", body: JSON.stringify(source) });
+  if (Object.keys(reste).length) await api(table, `?id=eq.${ligne.id}`, { method: "PATCH", body: JSON.stringify(reste) });
+}
+const CHAMPS_GARDE = {
+  biberons: { pris_le: "quand", quantite_ml: "ml", lait: "lait" },
+  couches: { change_le: "quand", pipi: "pipi", caca: "caca" },
+  sommeils: { debut: "quand", fin: "fin" },
+};
+
+// ---------- Dodo oublié ----------
+// Un dodo de plus de 12 h, c'est presque sûrement un réveil qu'on a oublié de noter.
+const DODO_OUBLIE_MS = 12 * 60 * 60 * 1000;
+const dodoOublie = (debut) => Date.now() - new Date(debut).getTime() > DODO_OUBLIE_MS;
+// Grande fenêtre simple : « À quelle heure s'est-elle réveillée ? » ou « Je ne sais plus, effacer ».
+// Renvoie { fin: Date }, { effacer: true } ou null (plus tard).
+function demanderReveilOublie(debut) {
+  const d0 = new Date(debut);
+  const dlg = $("oubli-dialog");
+  const jour = d0.toDateString() === new Date().toDateString() ? "aujourd'hui" : d0.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+  $("oubli-texte").textContent = `Le dodo commencé ${jour} à ${fmtHeure(d0)} n'a pas été arrêté. À quelle heure Hortense s'est-elle réveillée ?`;
+  // Proposition : 1 h après l'endormissement
+  const propose = new Date(d0.getTime() + 60 * 60 * 1000);
+  const remplir = (sel, max, valeur) => {
+    sel.replaceChildren(...Array.from({ length: max }, (_, i) => new Option(pad(i), pad(i))));
+    sel.value = pad(valeur);
+  };
+  remplir($("oubli-h"), 24, propose.getHours());
+  remplir($("oubli-m"), 60, Math.floor(propose.getMinutes() / 5) * 5);
+  $("oubli-erreur").textContent = "";
+  return new Promise((ok) => {
+    const fermer = (r) => {
+      dlg.close();
+      ok(r);
+    };
+    $("oubli-ok").onclick = () => {
+      const fin = new Date(d0);
+      fin.setHours(Number($("oubli-h").value), Number($("oubli-m").value), 0, 0);
+      if (fin <= d0) fin.setDate(fin.getDate() + 1); // ex. endormi à 23:00, réveillé à 01:30
+      if (fin > new Date()) return ($("oubli-erreur").textContent = "Cette heure est dans le futur : vérifie.");
+      if (fin - d0 > DODO_OUBLIE_MS) return ($("oubli-erreur").textContent = "Ça ferait plus de 12 h de dodo : vérifie l'heure.");
+      fermer({ fin });
+    };
+    $("oubli-effacer").onclick = () => fermer({ effacer: true });
+    $("oubli-plus-tard").onclick = () => fermer(null);
+    dlg.showModal();
+  });
+}

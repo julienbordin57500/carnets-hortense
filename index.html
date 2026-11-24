@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body class="verrouille">
   <!-- Accueil / connexion : on choisit son profil puis on tape le mot de passe donné par les parents -->
@@ -24,6 +24,7 @@
     <div class="login-sky" aria-hidden="true">
       <div class="login-sun"></div>
       <div class="stars"></div>
+    <div class="lucioles"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <svg class="cloud lc1" viewBox="0 0 100 40"><path d="M15 35 a12 12 0 0 1 8-22 a16 16 0 0 1 30-4 a13 13 0 0 1 24 6 a10 10 0 0 1 8 20z"/></svg>
       <svg class="cloud lc2" viewBox="0 0 100 40"><path d="M15 35 a12 12 0 0 1 8-22 a16 16 0 0 1 30-4 a13 13 0 0 1 24 6 a10 10 0 0 1 8 20z"/></svg>
     </div>
@@ -59,6 +60,20 @@
       <p class="hint small demo-hint" id="login-demo" hidden>🧸 Mode découverte : choisissez un profil et tapez n'importe quel mot de passe.</p>
     </form>
   </div>
+
+  <!-- Quoi de neuf ? (parents, une seule fois par téléphone) -->
+  <dialog class="sheet nouveautes" id="nouveautes" aria-labelledby="nouveautes-titre">
+    <form method="dialog" class="nouveautes-box">
+      <button type="submit" class="sheet-croix" aria-label="Fermer">✕</button>
+      <div class="tuto-emoji" aria-hidden="true">🎁</div>
+      <p class="sheet-title" id="nouveautes-titre">Quoi de neuf dans le carnet ?</p>
+      <p class="hint small center-text">Tout ce qui a été ajouté depuis la présentation de l'appli.</p>
+      <ul class="nouveautes-liste" id="nouveautes-liste"></ul>
+      <div class="sheet-actions">
+        <button type="submit" class="g-btn">Super, merci !</button>
+      </div>
+    </form>
+  </dialog>
 
   <!-- Petit tuto pour les grands-parents (première connexion) -->
   <dialog class="sheet tuto" id="tuto" aria-labelledby="tuto-titre">
@@ -278,6 +293,22 @@
           </g>
           <circle class="cloche-zone" cx="300" cy="92" r="26"/>
         </g>
+
+        <!-- 🎵 Les sons pour s'endormir : un petit médaillon à côté de la cloche -->
+        <g class="cloche-svg sons-svg" id="sons-svg" role="button" tabindex="0" aria-label="Sons pour s'endormir" hidden>
+          <path class="liane" d="M354 66 q3 3 0 6"/>
+          <g transform="translate(354 72)">
+            <g class="sons-balance">
+              <circle class="medaillon-ombre" cx="0.8" cy="12.8" r="12"/>
+              <circle class="medaillon" cx="0" cy="12" r="12"/>
+              <circle class="medaillon-cercle" cx="0" cy="12" r="9.5"/>
+              <!-- note de musique -->
+              <ellipse class="icone-cloche" cx="-2.2" cy="16.2" rx="3" ry="2.2" transform="rotate(-20 -2.2 16.2)"/>
+              <path class="icone-note" d="M0.6 15.8 V6 q4.2 1 4 5.2"/>
+            </g>
+          </g>
+          <circle class="cloche-zone" cx="354" cy="84" r="20"/>
+        </g>
       </svg>
 
       <div class="top">
@@ -291,7 +322,8 @@
             <g class="eyes-open"><circle cx="37" cy="50" r="4" class="ink"/><circle cx="63" cy="50" r="4" class="ink"/></g>
             <path class="eyes-closed ink-stroke" d="M32 50 q5 4 10 0 M58 50 q5 4 10 0" fill="none" stroke-width="3" stroke-linecap="round"/>
             <ellipse cx="50" cy="61" rx="6" ry="4.5" class="ink"/>
-            <path d="M44 70 q6 5 12 0" fill="none" stroke-width="3" stroke-linecap="round" class="ink-stroke"/>
+            <path d="M44 70 q6 5 12 0" fill="none" stroke-width="3" stroke-linecap="round" class="ink-stroke sourire"/>
+            <ellipse cx="50" cy="72" rx="4.5" ry="5.5" class="ink baille"/>
             <circle cx="29" cy="64" r="5" class="cheek"/><circle cx="71" cy="64" r="5" class="cheek"/>
             <g class="hortensia-oreille"><circle cx="80" cy="15" r="5"/><circle cx="88" cy="20" r="5"/><circle cx="84" cy="27" r="5"/><circle cx="76" cy="23" r="5"/><circle cx="82" cy="21" r="2.2" class="coeur"/></g>
           </svg>
@@ -330,6 +362,7 @@
           <p class="label">Dernier repas il y a</p>
           <p class="timer" id="repas-timer">--:--</p>
           <p class="sub" id="repas-info">Chargement…</p>
+          <p class="prochain" id="repas-prochain" hidden></p>
         </section>
 
         <section class="stats">
@@ -404,7 +437,7 @@
         <section class="card history">
           <p class="label">Dernières 24 heures</p>
           <ul id="repas-list"></ul>
-          <p class="empty" id="repas-empty" hidden>Aucun repas sur les dernières 24 heures.</p>
+          <p class="empty" id="repas-empty" data-animal="🧸" hidden>Pas encore de repas sur les dernières 24 heures.</p>
         </section>
       </div>
 
@@ -451,6 +484,11 @@
           <div class="panel" id="panel-caca" hidden>
             <p class="label">Taille du caca</p>
             <div class="chips sizes" id="chips-taille" role="radiogroup" aria-label="Taille du caca"></div>
+            <p class="label">Consistance <span class="label-facultatif">(si tu veux)</span></p>
+            <div class="chips" id="chips-texture" role="radiogroup" aria-label="Consistance du caca"></div>
+            <p class="label">Couleur <span class="label-facultatif">(si tu veux)</span></p>
+            <div class="chips couleurs" id="chips-couleur" role="radiogroup" aria-label="Couleur du caca"></div>
+            <p class="hint small couleur-conseil" id="couleur-conseil" hidden>🩺 Couleur à montrer au pédiatre à la prochaine occasion (ou à appeler s'il y a un doute).</p>
           </div>
 
           <div class="when">
@@ -468,7 +506,7 @@
         <section class="card history">
           <p class="label">Dernières 24 heures</p>
           <ul id="couche-list"></ul>
-          <p class="empty" id="couche-empty" hidden>Aucune couche sur les dernières 24 heures.</p>
+          <p class="empty" id="couche-empty" data-animal="🐰" hidden>Pas encore de couche sur les dernières 24 heures.</p>
         </section>
       </div>
 
@@ -518,7 +556,7 @@
         <section class="card history">
           <p class="label">Dernières 24 heures</p>
           <ul id="sleep-list"></ul>
-          <p class="empty" id="sleep-empty" hidden>Aucun dodo sur les dernières 24 heures.</p>
+          <p class="empty" id="sleep-empty" data-animal="🐻" hidden>Pas encore de dodo : Hortense se repose bientôt 💤</p>
         </section>
       </div>
 
@@ -664,13 +702,34 @@
           </div>
         </section>
 
-        <!-- Résumé pour les grands-parents : l'essentiel noté par tout le monde, sans le détail -->
-        <section class="card resume-maison" id="g-resume" hidden>
-          <div class="resume-tete">
-            <p class="resume-titre"><span aria-hidden="true">🏠</span> Les dernières nouvelles</p>
-            <span class="resume-maj" id="g-resume-maj"></span>
+        <!-- Noter maintenant : 3 gros boutons pour la famille (un appui = c'est noté) -->
+        <section class="card g-actions" id="g-actions" hidden>
+          <button type="button" class="g-reveil" id="g-reveil" hidden>
+            <span class="g-reveil-haut" id="g-reveil-depuis">😴 Hortense dort depuis 25 min</span>
+            <span class="g-reveil-bas">☀️ Toucher ici quand elle se réveille</span>
+          </button>
+          <div class="g-tuiles" id="g-tuiles">
+            <button type="button" class="g-tuile" id="g-t-biberon">
+              <span class="g-tuile-emoji" aria-hidden="true">🍼</span>
+              <span class="g-tuile-nom">Biberon</span>
+              <span class="g-tuile-sous">combien de ml ?</span>
+            </button>
+            <button type="button" class="g-tuile" id="g-t-couche">
+              <span class="g-tuile-emoji" aria-hidden="true">👶</span>
+              <span class="g-tuile-nom">Couche</span>
+              <span class="g-tuile-sous">pipi ou caca</span>
+            </button>
+            <button type="button" class="g-tuile" id="g-t-dodo">
+              <span class="g-tuile-emoji" aria-hidden="true" id="g-t-dodo-emoji">🌙</span>
+              <span class="g-tuile-nom" id="g-t-dodo-nom">Elle s'endort</span>
+              <span class="g-tuile-sous" id="g-t-dodo-sous">dodo</span>
+            </button>
           </div>
-          <div class="resume-grille" id="g-resume-liste" aria-live="polite"></div>
+          <p class="g-alerte-dodo" id="g-alerte-dodo" hidden></p>
+          <div class="g-liens">
+            <button type="button" class="g-oubli-lien" id="g-mot">📝 Un mot pour les parents</button>
+            <button type="button" class="g-oubli-lien" id="g-oubli-lien">🕓 J'ai oublié de noter</button>
+          </div>
         </section>
 
         <section class="card garde-day">
@@ -683,64 +742,44 @@
             <button type="button" class="day-arrow" id="g-next" aria-label="Jour suivant">›</button>
           </div>
           <p class="garde-by" id="g-by"></p>
+          <p class="g-vu" id="g-vu" hidden></p>
+          <button type="button" class="g-reactions" id="g-reactions" hidden aria-live="polite"></button>
           <ul class="notes" id="g-notes"></ul>
-          <div id="g-my-note" hidden>
-            <label class="field wide note-field">
-              <span id="g-my-note-label">📝 Ma note du jour</span>
-              <textarea id="g-note" maxlength="2000" rows="4" placeholder="Ce qu'on a fait aujourd'hui, comment elle était, ce qu'il faut savoir…"></textarea>
-            </label>
-            <button type="button" class="add-btn garde small" id="g-note-btn">
-              <span class="emoji" aria-hidden="true">💾</span><span>Enregistrer ma note</span>
-            </button>
-            <p class="hint small center-text" id="g-note-saved"></p>
-          </div>
-        </section>
 
-        <section class="card garde-recap">
-          <p class="label">Récap de la journée</p>
+
 
           <div class="g-row">
             <div class="g-head"><span class="g-emoji" aria-hidden="true">🍼</span><span class="g-title">Repas</span><span class="g-sum" id="g-repas-sum"></span></div>
             <div class="pills" id="g-repas-list"></div>
-            <div class="g-add" data-today-only>
-              <select id="g-ml" aria-label="Quantité">
-                <option value="">? ml</option><option value="10">10 ml</option><option value="20">20 ml</option><option value="30">30 ml</option><option value="40">40 ml</option><option value="50">50 ml</option><option value="60">60 ml</option><option value="70">70 ml</option><option value="80">80 ml</option><option value="90">90 ml</option><option value="100">100 ml</option><option value="110">110 ml</option><option value="120">120 ml</option><option value="130">130 ml</option><option value="140">140 ml</option><option value="150" selected>150 ml</option><option value="160">160 ml</option><option value="170">170 ml</option><option value="180">180 ml</option><option value="190">190 ml</option><option value="200">200 ml</option><option value="210">210 ml</option><option value="220">220 ml</option><option value="230">230 ml</option><option value="240">240 ml</option><option value="250">250 ml</option><option value="260">260 ml</option><option value="270">270 ml</option><option value="280">280 ml</option><option value="290">290 ml</option><option value="300">300 ml</option>
-              </select>
-              <select id="g-lait" aria-label="Type de lait">
-                <option value="poudre">🥄 Poudre</option><option value="maternel">🥛 Maternel</option>
-              </select>
-              <button type="button" class="g-btn" id="g-repas-btn">+ Biberon</button>
-            </div>
           </div>
-
           <div class="g-row">
             <div class="g-head"><span class="g-emoji" aria-hidden="true">👶</span><span class="g-title">Couches</span><span class="g-sum" id="g-couche-sum"></span></div>
             <div class="pills" id="g-couche-list"></div>
-            <div class="g-add" data-today-only>
-              <button type="button" class="g-btn" data-couche="pipi">+ 💧</button>
-              <button type="button" class="g-btn" data-couche="caca">+ 💩</button>
-              <button type="button" class="g-btn" data-couche="les deux">+ 💧💩</button>
-            </div>
           </div>
-
           <div class="g-row">
             <div class="g-head"><span class="g-emoji" aria-hidden="true">😴</span><span class="g-title">Sommeil</span><span class="g-sum" id="g-sleep-sum"></span></div>
             <div class="pills" id="g-sleep-list"></div>
-            <div class="g-add" data-today-only>
-              <button type="button" class="g-btn wide" id="g-sleep-btn">🌙 Elle s'endort</button>
-            </div>
-            <div class="g-add g-range" data-writer-only>
-              <label class="field"><span>Endormie à</span><input type="time" id="g-dodo-debut"></label>
-              <label class="field"><span>Réveillée à</span><input type="time" id="g-dodo-fin"></label>
-              <button type="button" class="g-btn wide alt" id="g-dodo-add">+ Ajouter ce dodo</button>
-            </div>
           </div>
-
-          <p class="hint small" id="g-read-hint">👀 Mode consultation. Pour noter quelque chose, choisis qui tu es tout en haut.</p>
-          <p class="hint small" id="g-past-hint" hidden>Pour noter un repas ou une couche, reviens sur aujourd'hui. Un dodo peut être ajouté pour n'importe quel jour.</p>
+          <p class="hint" id="g-modif-hint" hidden>✏️ Une erreur ? Touche la ligne pour changer l'heure ou l'effacer.</p>
+          <p class="hint small" id="g-read-hint">👀 Mode consultation.</p>
           <p class="hint small" id="g-tuto-box" hidden><button type="button" class="link" id="g-tuto">💡 Revoir le petit tuto</button></p>
-          <p class="hint small">Tout est enregistré en ligne : chaque téléphone qui a le lien voit les mêmes notes et le même récap. Rien ne se mélange avec vos pages Repas, Couches et Sommeil. Touche deux fois une de tes pastilles pour l'effacer.</p>
         </section>
+
+        <!-- Résumé pour les grands-parents : l'essentiel noté par tout le monde, sans le détail -->
+        <section class="card resume-maison" id="g-resume" hidden>
+          <div class="resume-tete">
+            <p class="resume-titre"><span aria-hidden="true">🏠</span> Les dernières nouvelles</p>
+            <span class="resume-maj" id="g-resume-maj"></span>
+          </div>
+          <div class="resume-grille" id="g-resume-liste" aria-live="polite"></div>
+        </section>
+
+        <!-- Petite fenêtre à tout faire de la garde (couche, quantité, oubli, modifier une ligne) -->
+        <dialog class="sheet g-feuille" id="g-feuille" aria-labelledby="g-feuille-titre">
+          <p class="sheet-title" id="g-feuille-titre"></p>
+          <div class="g-feuille-corps" id="g-feuille-corps"></div>
+          <button type="button" class="link g-feuille-fermer" id="g-feuille-fermer">Annuler</button>
+        </dialog>
       </div>
     </div>
 
@@ -872,6 +911,63 @@
   </dialog>
 
   <!-- Fenêtre de modification d'une entrée (repas, couche, dodo) -->
+  <!-- 🎵 Sons pour s'endormir -->
+  <dialog class="sheet" id="sons" aria-labelledby="sons-titre">
+    <form method="dialog">
+      <button type="submit" value="ok" class="sheet-croix" aria-label="Fermer">✕</button>
+      <p class="sheet-title" id="sons-titre">🎵 Pour s'endormir</p>
+      <div class="sons-liste" id="sons-liste"></div>
+      <p class="label">S'arrête tout seul après</p>
+      <div class="chips" id="sons-durees" role="radiogroup" aria-label="Durée"></div>
+      <div class="sons-perso" id="sons-perso">
+        <span class="sons-perso-label">Ou au choix :</span>
+        <button type="button" class="stepper-btn" id="sons-moins" aria-label="5 minutes de moins">−</button>
+        <button type="button" class="sons-perso-val" id="sons-perso-val">45 min</button>
+        <button type="button" class="stepper-btn" id="sons-plus" aria-label="5 minutes de plus">+</button>
+      </div>
+      <p class="sons-reste" id="sons-reste" aria-live="polite"></p>
+      <p class="hint small">Le son continue écran verrouillé. Le volume se règle avec les boutons du téléphone : garde-le doux et le téléphone loin du lit 🙂</p>
+      <details class="sons-credits hint small">
+        <summary>Crédits des sons</summary>
+        Musiques de Kevin MacLeod (incompetech.com), sous licence Creative Commons : By Attribution 4.0 :
+        « Canon in D for Two Harps », « Water Lily », « Prelude in C (BWV 846) », « Music for Manatees ».
+        Ambiances de Wikimedia Commons : pluie « Rain on leaves » par Gravity Sound (CC BY 4.0),
+        vagues « Ocean Waves on a Tropical Beach » par Jarrod Stanley (CC0), bruit grave par JPxG (CC0),
+        bruit blanc doux (domaine public).
+      </details>
+      <div class="sheet-actions">
+        <button type="submit" value="ok" class="g-btn alt">Fermer</button>
+        <button type="button" class="link" id="sons-stop" hidden>⏹️ Arrêter le son</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="sheet" id="oubli-dialog" aria-labelledby="oubli-titre">
+    <div class="oubli">
+      <p class="sheet-title" id="oubli-titre">😴 Réveil oublié ?</p>
+      <p id="oubli-texte"></p>
+      <p class="label">Réveillée vers</p>
+      <div class="heure-menus oubli-heure">
+        <select id="oubli-h" aria-label="Heures"></select><span>:</span><select id="oubli-m" aria-label="Minutes"></select>
+      </div>
+      <p class="edit-erreur" id="oubli-erreur" aria-live="polite"></p>
+      <button type="button" class="g-btn wide" id="oubli-ok">☀️ Enregistrer le réveil</button>
+      <button type="button" class="g-btn alt wide" id="oubli-effacer">🗑️ Je ne sais plus, effacer ce dodo</button>
+      <button type="button" class="link" id="oubli-plus-tard">Plus tard</button>
+    </div>
+  </dialog>
+
+  <dialog class="sheet" id="g-doublon" aria-labelledby="g-doublon-titre">
+    <form method="dialog">
+      <p class="sheet-title" id="g-doublon-titre">⚠️ Déjà noté ?</p>
+      <p id="g-doublon-texte"></p>
+      <div class="sheet-actions">
+        <button type="submit" value="non" class="g-btn">Non, c'était en trop</button>
+        <button type="submit" value="oui" class="link" id="g-doublon-oui">Oui, c'est bien un autre</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog class="sheet" id="edit-dialog" aria-labelledby="edit-title">
     <form method="dialog" id="edit-form" novalidate>
       <p class="sheet-title" id="edit-title">Modifier</p>
@@ -885,24 +981,26 @@
   </dialog>
 
 
-  <script src="scene.js?v=11"></script>
+  <script src="scene.js?v=12"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-  <script src="config.js?v=11"></script>
-  <script src="commun.js?v=11"></script>
-  <script src="demo.js?v=11"></script>
-  <script src="auth.js?v=11"></script>
-  <script src="repas.js?v=11"></script>
-  <script src="couches.js?v=11"></script>
-  <script src="sommeil.js?v=11"></script>
-  <script src="sante.js?v=11"></script>
-  <script src="medicaments.js?v=11"></script>
-  <script src="resume.js?v=11"></script>
-  <script src="garde.js?v=11"></script>
-  <script src="graphiques.js?v=11"></script>
-  <script src="fetes.js?v=11"></script>
-  <script src="notifs.js?v=11"></script>
-  <script src="comptes.js?v=11"></script>
-  <script src="tuto.js?v=11"></script>
-  <script src="pages.js?v=11"></script>
+  <script src="config.js?v=12"></script>
+  <script src="commun.js?v=12"></script>
+  <script src="demo.js?v=12"></script>
+  <script src="auth.js?v=12"></script>
+  <script src="repas.js?v=12"></script>
+  <script src="couches.js?v=12"></script>
+  <script src="sommeil.js?v=12"></script>
+  <script src="sante.js?v=12"></script>
+  <script src="medicaments.js?v=12"></script>
+  <script src="resume.js?v=12"></script>
+  <script src="sons.js?v=12"></script>
+  <script src="garde.js?v=12"></script>
+  <script src="graphiques.js?v=12"></script>
+  <script src="fetes.js?v=12"></script>
+  <script src="notifs.js?v=12"></script>
+  <script src="comptes.js?v=12"></script>
+  <script src="tuto.js?v=12"></script>
+  <script src="nouveautes.js?v=12"></script>
+  <script src="pages.js?v=12"></script>
 </body>
 </html>

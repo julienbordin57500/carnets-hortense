@@ -332,10 +332,11 @@
   async function stats(debut, fin) {
     const a = encodeURIComponent(debut.toISOString());
     const b = encodeURIComponent(fin.toISOString());
-    const [repas, couches, dodos] = await Promise.all([
+    const [repas, couches, dodos, garde] = await Promise.all([
       api("biberons", `?select=type,pris_le,quantite_ml,duree_min&pris_le=gte.${a}&pris_le=lt.${b}`),
-      api("couches", `?select=change_le,pipi,caca,caca_taille&change_le=gte.${a}&change_le=lt.${b}`),
+      api("couches", `?select=change_le,pipi,caca,caca_taille,caca_texture,caca_couleur&change_le=gte.${a}&change_le=lt.${b}`),
       api("sommeils", `?select=debut,fin&debut=lt.${b}&or=(fin.is.null,fin.gte.${a})`),
+      api("garde_evenements", `?select=quand,gardien&quand=gte.${a}&quand=lt.${b}`),
     ]);
     const finEffective = Math.min(fin.getTime(), Date.now());
     // Jours renseignés : on fait les moyennes seulement sur les jours où quelque chose a été noté
@@ -356,6 +357,16 @@
     const all = repas.filter((r) => r.type === "allaitement");
     const n = Math.max(jours.size, 1);
     const allDurees = all.filter((r) => r.duree_min);
+    // Écart moyen entre deux repas d'un même jour (les nuits sans repas ne faussent pas la moyenne)
+    const heures = repas.map((r) => new Date(r.pris_le).getTime()).sort((x, y) => x - y);
+    const ecarts = heures.slice(1).map((t, i) => t - heures[i]).filter((e) => e > 0 && e < 8 * 3600000);
+    const cacas = couches.filter((c) => c.caca);
+    const compter = (cle) => cacas.reduce((o, c) => (c[cle] ? { ...o, [c[cle]]: (o[c[cle]] || 0) + 1 } : o), {});
+    // Jours de garde et qui a gardé
+    const parJour = {};
+    garde.forEach((g) => g.gardien && (parJour[new Date(g.quand).toDateString()] ??= new Set()).add(g.gardien));
+    const gardiens = {};
+    Object.values(parJour).forEach((set) => set.forEach((nom) => (gardiens[nom] = (gardiens[nom] || 0) + 1)));
     return {
       jours: jours.size,
       repasJour: repas.length / n,
@@ -366,8 +377,15 @@
       allDuree: allDurees.length ? allDurees.reduce((t, r) => t + r.duree_min, 0) / allDurees.length : 0,
       couchesJour: couches.length / n,
       pipisJour: couches.filter((c) => c.pipi).length / n,
-      cacasJour: couches.filter((c) => c.caca).length / n,
-      tailles: ["petit", "moyen", "gros"].map((t) => couches.filter((c) => c.caca_taille === t).length),
+      cacasJour: cacas.filter((c) => c.caca_taille !== "trace").length / n,
+      textures: compter("caca_texture"),
+      couleurs: compter("caca_couleur"),
+      plusGrosBib: bib.reduce((m, r) => Math.max(m, r.quantite_ml || 0), 0),
+      ecartRepas: ecarts.length ? ecarts.reduce((t, e) => t + e, 0) / ecarts.length : 0,
+      dodosJour: dodos.filter((d) => new Date(d.debut) >= debut).length / n,
+      joursGarde: Object.keys(parJour).length,
+      gardiens,
+      tailles: ["trace", "petit", "moyen", "gros"].map((t) => couches.filter((c) => c.caca_taille === t).length),
       dodoJour: msDodo / n,
       plusLongue,
     };
@@ -418,19 +436,34 @@
     L.push(`• dont ${pl(s.bibJour, "biberon")} et ${pl(s.allJour, "allaitement")} par jour`);
     if (s.mlJour) L.push(`• ${Math.round(s.mlJour)} ml de lait au biberon par jour${evol(s.mlJour, a?.mlJour, " ml", (x) => Math.round(x))}`);
     if (s.bibMoyen) L.push(`• biberon moyen : ${Math.round(s.bibMoyen)} ml`);
+    if (s.plusGrosBib) L.push(`• plus gros biberon : ${s.plusGrosBib} ml`);
     if (s.allDuree) L.push(`• allaitement moyen : ${Math.round(s.allDuree)} min`);
+    if (s.ecartRepas) L.push(`• en moyenne un repas toutes les ${fmtMinutes(s.ecartRepas)}`);
     L.push("");
     L.push("👶 COUCHES");
     L.push(`• ${v1(s.couchesJour)} couches par jour${evol(s.couchesJour, a?.couchesJour)}`);
     L.push(`• ${pl(s.pipisJour, "pipi")} et ${pl(s.cacasJour, "caca")} par jour`);
-    const tailles = ["petit", "moyen", "gros"].map((t, i) => s.tailles[i] && `${s.tailles[i]} ${t}${s.tailles[i] > 1 && t !== "gros" ? "s" : ""}`).filter(Boolean);
+    const tailles = ["trace", "petit", "moyen", "gros"].map((t, i) => s.tailles[i] && `${s.tailles[i]} ${t}${s.tailles[i] > 1 && t !== "gros" ? "s" : ""}`).filter(Boolean);
     if (tailles.length) L.push(`• taille des cacas : ${tailles.join(", ")}`);
+    const NOMS_TEXTURE = { liquide: "liquide", molle: "molle", normale: "normale", moulee: "moulée", dure: "dure" };
+    const liste = (o, noms) => Object.entries(o).sort((x, y) => y[1] - x[1]).map(([k, c]) => `${noms[k] || k} ×${c}`).join(", ");
+    if (Object.keys(s.textures).length) L.push(`• consistance : ${liste(s.textures, NOMS_TEXTURE)}`);
+    const NOMS_COULEUR = { jaune: "jaune", orange: "orange", vert: "vert", marron: "marron", noir: "noir", rouge: "rouge", blanc: "blanc / gris" };
+    if (Object.keys(s.couleurs).length) L.push(`• couleur : ${liste(s.couleurs, NOMS_COULEUR)}`);
+    const alertes = ["noir", "rouge", "blanc"].filter((c) => s.couleurs[c]);
+    if (alertes.length) L.push(`• 🩺 à signaler au pédiatre : couleur ${alertes.map((c) => NOMS_COULEUR[c]).join(", ")}`);
     L.push("");
     L.push("😴 SOMMEIL");
     if (s.dodoJour) {
       L.push(`• ${fmtMinutes(s.dodoJour)} de sommeil noté par jour${evol(s.dodoJour / 3600000, a ? a.dodoJour / 3600000 : null, " h")}`);
+      if (s.dodosJour) L.push(`• ${v1(s.dodosJour)} dodos par jour en moyenne`);
       if (s.plusLongue) L.push(`• plus longue nuit : ${fmtMinutes(s.plusLongue.duree)} (nuit du ${s.plusLongue.le.toLocaleDateString("fr-FR", { day: "numeric", month: "long" })})`);
     } else L.push("• pas de sommeil noté");
+
+    if (s.joursGarde) {
+      L.push("", "👵 GARDE");
+      L.push(`• ${s.joursGarde} jour${s.joursGarde > 1 ? "s" : ""} de garde : ${Object.entries(s.gardiens).map(([nom, j]) => `${nom} (${j} j)`).join(", ")}`);
+    }
 
     const derniere = mesures[0];
     if (derniere) {
@@ -441,6 +474,13 @@
         derniere.pc_cm !== null && `tour de tête ${v1(Number(derniere.pc_cm))} cm`,
       ].filter(Boolean);
       L.push(`• ${m.join(", ")} le ${dateLocale(derniere.mesure_le).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}`);
+      // Prise de poids depuis la mesure précédente (en grammes par semaine, comme au carnet de santé)
+      const avantPoids = mesures.slice(1).find((x) => x.poids_kg !== null);
+      if (derniere.poids_kg !== null && avantPoids) {
+        const jours = (dateLocale(derniere.mesure_le) - dateLocale(avantPoids.mesure_le)) / DAY_MS;
+        const g = Math.round((Number(derniere.poids_kg) - Number(avantPoids.poids_kg)) * 1000);
+        if (jours >= 3) L.push(`• ${g >= 0 ? "+" : ""}${g} g depuis le ${dateLocale(avantPoids.mesure_le).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}, soit ${Math.round((g / jours) * 7)} g par semaine`);
+      }
     }
     if (meds.length) {
       const compte = {};

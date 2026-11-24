@@ -58,7 +58,7 @@ const connexionPrete = new Promise((r) => (resoudreConnexion = r));
     const copie = source.cloneNode(true);
     copie.removeAttribute("class");
     copie.classList.add("landscape", "login-landscape");
-    copie.querySelector(".cloche-svg")?.remove();
+    copie.querySelectorAll(".cloche-svg").forEach((el) => el.remove());
     copie.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
     copie.querySelectorAll(".walker").forEach((w) => w.removeAttribute("style"));
     copie.querySelector(".giraffe")?.classList.add("on", "walking");

@@ -1,7 +1,7 @@
 // Page Repas : biberons et allaitements (table « biberons »)
 (() => {
   const TABLE = "biberons";
-  const COLONNES = "id,type,pris_le,quantite_ml,cote,duree_min,lait,reprise_sommeil,gardien";
+  const COLONNES = "id,type,pris_le,quantite_ml,cote,duree_min,lait,reprise_sommeil,gardien,garde_id";
   const REPRISE_MAX_MS = 3 * 60 * 60 * 1000; // au-delà, on ne propose plus de relancer le dodo
   // De 10 à 300 ml, de 10 en 10 (la roue de l'iPhone s'ouvre en touchant « Combien ? »)
   const QUANTITES = Array.from({ length: 30 }, (_, i) => (i + 1) * 10);
@@ -41,10 +41,35 @@
         dernier = d || null;
       }
       afficherErreur(null);
+      reprendreDerniereQuantite();
     } catch (e) {
       afficherErreur("Impossible de charger les données. Vérifie la connexion internet.");
     }
     rendre();
+  }
+
+  // Le compteur de ml démarre sur la quantité du dernier biberon (noté par n'importe qui,
+  // garde comprise) : une seule fois par nouveau biberon, pour ne pas défaire un réglage en cours
+  function reprendreDerniereQuantite() {
+    const bib = repas.find((r) => r.type !== "allaitement" && QUANTITES.includes(r.quantite_ml));
+    if (!bib || bib.id === lire("quantite-de", null, (v) => typeof v === "number")) return;
+    ecrire("quantite-de", bib.id);
+    if (bib.quantite_ml !== choix.quantite) majQuantite(bib.quantite_ml);
+  }
+
+  // « Prochain repas vers 15:40 » : dernier repas + écart habituel (médiane des dernières 24 h)
+  function prochainRepas() {
+    if (!dernier) return null;
+    const heures = repas.map((r) => new Date(r.pris_le).getTime());
+    const ecarts = heures
+      .slice(1)
+      .map((h, i) => heures[i] - h)
+      .filter((e) => e >= 45 * 60000 && e <= 6 * 3600000)
+      .sort((a, b) => a - b);
+    if (ecarts.length < 2) return null;
+    const milieu = ecarts.length >> 1;
+    const habituel = ecarts.length % 2 ? ecarts[milieu] : (ecarts[milieu - 1] + ecarts[milieu]) / 2;
+    return new Date(new Date(dernier.pris_le).getTime() + Math.round(habituel / 300000) * 300000);
   }
 
   async function ajouter() {
@@ -57,12 +82,18 @@
           : { type: "allaitement", cote: choix.cote, duree_min: choix.duree };
       const quand = heureChoisie("repas-heure");
       ligne.pris_le = quand.toISOString();
+      // Même biberon noté il y a moins de 5 minutes : sans doute un appui en trop
+      const pareil = !$("repas-heure").value && repas.find((r) => recemment(r.pris_le) && r.type === ligne.type && (r.quantite_ml ?? null) === (ligne.quantite_ml ?? null) && (r.cote ?? null) === (ligne.cote ?? null));
+      if (pareil && !(await demanderDoublon(`Tu as déjà noté ce ${ligne.type === "biberon" ? `biberon${ligne.quantite_ml ? ` de ${ligne.quantite_ml} ml` : ""}` : "repas"} ${fmtIlYa(Date.now() - new Date(pareil.pris_le))}. C'est bien un deuxième ?`))) {
+        toast("Pas ajouté 👍");
+        return;
+      }
       // La nuit, si Hortense dormait, le repas met le dodo en pause
       const pause = estLaNuit(quand) && (await mettreDodoEnPause(quand));
       if (pause) ligne.reprise_sommeil = true;
-      await api(TABLE, "", { method: "POST", body: JSON.stringify(ligne) });
+      const id = await ajouterLigne(TABLE, ligne);
       animerBouton(btn);
-      toast(pause ? "🌙 Dodo en pause pendant le repas" : `${MODES[mode].emoji} ${MODES[mode].nom} ajouté !`);
+      toast(pause ? "🌙 Dodo en pause pendant le repas" : `${MODES[mode].emoji} ${MODES[mode].nom} ajouté !`, pause ? null : annulerAjout(TABLE, id));
       $("repas-heure").value = "";
       await (pause ? rechargerTout() : charger());
     } catch (e) {
@@ -132,7 +163,7 @@
       maj.lait = v.lait;
     }
     try {
-      await api(TABLE, `?id=eq.${r.id}`, { method: "PATCH", body: JSON.stringify(maj) });
+      await modifierLigne(TABLE, r, maj, CHAMPS_GARDE.biberons);
       toast("✏️ Repas modifié");
       await charger();
     } catch (e) {
@@ -140,9 +171,10 @@
     }
   }
 
-  async function supprimer(id) {
+  // Une note venue de la garde s'efface à la source (et donc aussi chez les grands-parents)
+  async function supprimer(id, gardeId) {
     try {
-      await api(TABLE, `?id=eq.${id}`, { method: "DELETE" });
+      await api(gardeId ? "garde_evenements" : TABLE, `?id=eq.${gardeId || id}`, { method: "DELETE" });
       toast("Repas supprimé");
       await charger();
     } catch (e) {
@@ -167,6 +199,10 @@
     const ecart = Date.now() - new Date(dernier.pris_le).getTime();
     el.textContent = fmtDuree(ecart);
     couleurMinuteur(el, ecart, WARN_MS, LATE_MS);
+    const p = $("repas-prochain");
+    const prochain = repasDeNuit() ? null : prochainRepas();
+    p.hidden = !prochain;
+    if (prochain) p.textContent = prochain > Date.now() ? `Prochain repas vers ${fmtHeure(prochain)}` : `Prochain repas : c'était prévu vers ${fmtHeure(prochain)}`;
   }
 
   function rendre() {
@@ -190,7 +226,7 @@
     remplirStat("today", repas.filter((r) => new Date(r.pris_le) >= debutJour));
     remplirStat("day", repas);
 
-    $("repas-list").replaceChildren(...repas.map(ligneHistorique));
+    $("repas-list").replaceChildren(...avecMoments(repas, (x) => x.pris_le, ligneHistorique));
     $("repas-empty").hidden = repas.length > 0;
     contenuChange();
   }
@@ -204,7 +240,7 @@
       <span class="h-time">${fmtHeure(r.pris_le)}</span>
       <span class="h-info"><span class="h-type">${m.nom}</span>${det ? `<span class="h-det">${det}</span>` : ""}${parGardien(r)}</span>
       <span class="h-ago">${fmtIlYa(Date.now() - new Date(r.pris_le).getTime())}</span>`;
-    li.append(boutonSupprimer(`Supprimer le repas de ${fmtHeure(r.pris_le)}`, () => supprimer(r.id)));
+    li.append(boutonSupprimer(`Supprimer le repas de ${fmtHeure(r.pris_le)}`, () => supprimer(r.id, r.garde_id)));
     rendreModifiable(li, () => modifier(r));
     return li;
   }

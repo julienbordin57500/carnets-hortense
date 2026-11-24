@@ -1,3 +1,8 @@
+/* Les couleurs du ciel peuvent glisser de l'une à l'autre (aube, coucher de soleil…) */
+@property --sky-top { syntax: "<color>"; inherits: true; initial-value: #f9d3d3; }
+@property --sky-bottom { syntax: "<color>"; inherits: true; initial-value: #fcf3ec; }
+@property --sun { syntax: "<color>"; inherits: true; initial-value: #f6c9a8; }
+:root { transition: --sky-top 4s ease, --sky-bottom 4s ease, --sun 4s ease; }
 :root {
   /* Palette « oursons et hortensias » : rose poudré, beige, crème, vert sauge */
   --sky-top: #f9d3d3;
@@ -227,6 +232,8 @@ body {
   :root:not([data-theme="light"]) .sun-face .cheek { opacity: 0; }
 }
 :root[data-theme="dark"] .stars { opacity: 1; }
+html:root.nuit-douce .stars { opacity: .55; }
+html:root.nuit-douce .sun-face .cheek { opacity: 0; }
 .stars {
   background-image:
     radial-gradient(2px 2px at 12% 20%, #fff 50%, transparent 51%),
@@ -290,6 +297,12 @@ h1 { margin: 0; font-size: 2.4rem; line-height: 1; font-weight: 700; letter-spac
 
 /* Minuteur */
 .timer-card { text-align: center; padding: 20px 18px; }
+/* « Prochain biberon vers 15:40 » : petite pastille discrète sous le chrono */
+.prochain {
+  display: inline-block; margin: 10px 0 0; padding: 4px 12px; border-radius: 999px;
+  background: var(--chip); color: var(--ink-soft); font-size: .92rem; font-weight: 600;
+}
+.prochain[hidden] { display: none; }
 .timer {
   margin: 0; font-size: clamp(3rem, 15vw, 4.4rem); font-weight: 700; line-height: 1.05;
   font-variant-numeric: tabular-nums; color: var(--good); transition: color .4s;
@@ -359,6 +372,14 @@ h1 { margin: 0; font-size: 2.4rem; line-height: 1; font-weight: 700; letter-spac
   padding: 10px 0; border-top: 2px dashed var(--card-border);
 }
 .history li:first-child { border-top: 0; }
+/* Petit titre de moment de la journée (Matin, Après-midi…) : remplace le pointillé */
+.history li.h-moment {
+  display: flex; align-items: center; gap: 8px; padding: 12px 0 2px; border-top: 0;
+  font-size: .8rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soft);
+}
+.history li.h-moment::after { content: ""; flex: 1; height: 2px; border-radius: 2px; background: var(--card-border); }
+.history li.h-moment:first-child { padding-top: 2px; }
+.history li.h-moment + li { border-top: 0; }
 .history .h-time { font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 4.2ch; }
 .history .h-emoji { font-size: 1.4rem; width: 1.6rem; text-align: center; flex: none; }
 .history .h-info { flex: 1; display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
@@ -500,9 +521,11 @@ body[data-page="4"] .tab[aria-selected="true"] { background: var(--garde); color
 #t-caca[aria-pressed="true"] { background: #a0703f; border-color: #a0703f; }
 .sizes .chip { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 6px; }
 .sizes .chip::before { content: "💩"; line-height: 1; }
-.sizes .chip:nth-child(1)::before { font-size: .9rem; }
-.sizes .chip:nth-child(2)::before { font-size: 1.3rem; }
-.sizes .chip:nth-child(3)::before { font-size: 1.8rem; }
+.sizes .chip:nth-child(1)::before { content: "💨"; font-size: 1.1rem; }
+.sizes .chip:nth-child(2)::before { font-size: .9rem; }
+.sizes .chip:nth-child(3)::before { font-size: 1.3rem; }
+.sizes .chip:nth-child(4)::before { font-size: 1.8rem; }
+.sizes .chip { min-width: 0; font-size: .85rem; text-align: center; line-height: 1.15; }
 .add-btn.couche { background: var(--couche); color: #fff; box-shadow: 0 6px 0 color-mix(in srgb, var(--couche) 60%, #000); }
 
 /* ---------- Sommeil ---------- */
@@ -512,7 +535,7 @@ body[data-page="4"] .tab[aria-selected="true"] { background: var(--garde); color
 .add-btn.sleep { background: var(--sleep); color: #fff; box-shadow: 0 6px 0 color-mix(in srgb, var(--sleep) 60%, #000); }
 .add-btn.sleep.wake { background: var(--wake); color: #3a2508; box-shadow: 0 6px 0 color-mix(in srgb, var(--wake) 60%, #000); }
 
-/* Quand Noah dort, le lion ferme les yeux */
+/* Quand Hortense dort, l'ourson ferme les yeux */
 .lion { position: relative; }
 .lion .eyes-closed { display: none; }
 .bebe-dort .lion .eyes-open { display: none; }
@@ -946,14 +969,23 @@ body { overscroll-behavior-y: none; }
 .chip:active, .mode-btn:active, .who-btn:active, .g-btn:active, .day-arrow:active, .med-add:active, .pill:active { transform: scale(.95); }
 .del:active { transform: scale(.88); }
 .add-btn { position: relative; overflow: hidden; transition: transform .12s, box-shadow .12s, background .25s; }
-/* Reflet discret sur les gros boutons */
-.add-btn::after {
-  content: ""; position: absolute; inset: 0 auto 0 -60%; width: 40%;
-  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .28), transparent);
-  transform: skewX(-20deg); animation: reflet 5s ease-in-out infinite 2s; pointer-events: none;
+/* C'est noté : le bouton rebondit et une coche verte apparaît une seconde */
+.g-tuile { position: relative; }
+.add-btn.pop, .g-tuile.pop { animation: rebond-ok .45s cubic-bezier(.3, .7, .4, 1.5); }
+@keyframes rebond-ok { 35% { transform: scale(1.05); } 65% { transform: scale(.98); } }
+.coche-ok {
+  position: absolute; top: 6px; right: 8px; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; font-size: .95rem; font-weight: 800; line-height: 1;
+  background: var(--good); color: #fff; box-shadow: 0 2px 0 rgba(0, 0, 0, .2);
+  pointer-events: none; animation: coche-ok 1s ease forwards;
 }
-@keyframes reflet { 0%, 70% { left: -60%; } 100% { left: 130%; } }
-.add-btn:disabled::after { animation: none; }
+@keyframes coche-ok {
+  0% { opacity: 0; transform: scale(.3); }
+  25% { opacity: 1; transform: scale(1.15); }
+  40%, 75% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(.8); }
+}
+@media (prefers-reduced-motion: reduce) { .add-btn.pop, .g-tuile.pop, .coche-ok { animation-duration: .01s; } }
 
 /* Pastilles choisies : petit rebond */
 .chip[aria-checked="true"], .mode-btn[aria-selected="true"], .mode-btn.toggle[aria-pressed="true"] { animation: choisi .3s cubic-bezier(.3, .7, .4, 1.6); }
@@ -1224,3 +1256,313 @@ dialog.sheet::backdrop { touch-action: none; }
 /* Étiquette « par Mamou » dans les listes des parents */
 .h-par { display: inline-block; margin-top: 2px; padding: 1px 8px; border-radius: 999px; font-size: .75rem; font-weight: 700;
   color: var(--ink-soft); background: color-mix(in srgb, var(--garde) 22%, transparent); }
+
+/* Couleur du caca (page Couches, parents) */
+.chips.couleurs { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; }
+.couleur-chip { display: flex; align-items: center; gap: 6px; justify-content: flex-start; padding: 6px 10px; font-size: .9rem; }
+.rond-couleur { display: inline-block; width: 14px; height: 14px; border-radius: 50%; flex: none;
+  border: 1.5px solid color-mix(in srgb, var(--ink) 25%, transparent); vertical-align: -2px; margin-right: 5px; }
+.couleur-chip .rond-couleur { margin-right: 0; width: 16px; height: 16px; }
+.label-facultatif { font-weight: 400; color: var(--ink-soft); font-size: .85em; }
+.couleur-conseil { margin: 4px 0 0; }
+
+/* Fenêtre Modifier : l'heure en deux menus (heures : minutes) */
+.heure-menus { display: flex; align-items: center; gap: 6px; font-weight: 800; }
+.heure-menus select { flex: 1; text-align: center; font-size: 1.1rem; }
+
+/* Fenêtre Modifier : la date en trois menus, et les notes sur plusieurs lignes */
+.date-menus select:nth-child(2) { flex: 1.4; }
+#edit-fields textarea { width: 100%; resize: vertical; }
+.h-note { white-space: pre-line; }
+
+/* 🎵 Médaillon des sons et fenêtre « Pour s'endormir » */
+.icone-note { fill: none; stroke: #7a4a24; stroke-width: 1.8; stroke-linecap: round; }
+.sons-balance { transform-origin: 0 0; transform-box: view-box; }
+.sons-svg.joue .sons-balance { animation: berce-medaillon 3.2s ease-in-out infinite; }
+@keyframes berce-medaillon { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+.sons-liste { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.son-tuile {
+  display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center;
+  padding: 10px 6px; border-radius: 18px; border: 2px solid var(--card-border);
+  background: var(--chip); color: var(--ink); font: inherit; cursor: pointer;
+}
+.son-tuile:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.son-emoji { font-size: 1.7rem; line-height: 1.2; }
+.son-nom { font-weight: 800; font-size: .95rem; line-height: 1.2; }
+.son-sous { font-size: .75rem; color: var(--ink-soft); }
+.son-tuile.joue { border-color: var(--sleep); background: color-mix(in srgb, var(--sleep) 22%, var(--card)); }
+.son-tuile.joue .son-emoji { animation: tuile-berce 3s ease-in-out infinite; }
+#sons-durees { display: flex; flex-wrap: wrap; gap: 6px; }
+@media (prefers-reduced-motion: reduce) { .sons-svg.joue .sons-balance, .son-tuile.joue .son-emoji { animation: none; } }
+
+/* Minuterie des sons : durée au choix avec − / + */
+.sons-perso { display: flex; align-items: center; gap: 8px; }
+.sons-perso-label { font-size: .9rem; color: var(--ink-soft); flex: 1; }
+.sons-perso .stepper-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--card-border);
+  background: var(--chip); color: var(--ink); font: inherit; font-size: 1.3rem; font-weight: 800; cursor: pointer; }
+.sons-perso-val { min-width: 92px; padding: 8px 12px; border-radius: 999px; border: 2px solid var(--card-border);
+  background: var(--chip); color: var(--ink); font: inherit; font-weight: 800; cursor: pointer; }
+.sons-perso.on .sons-perso-val { background: var(--chip-on); border-color: var(--chip-on); color: var(--chip-on-ink); }
+.sons-reste { margin: 0; text-align: center; font-weight: 700; color: var(--sleep); min-height: 1.2em; }
+.sons-reste:empty { display: none; }
+.sons-credits { margin-top: 4px; } .sons-credits summary { cursor: pointer; }
+
+/* Garde : réactions des parents (façon iMessage) et doublons */
+.pill-groupe { position: relative; display: inline-flex; align-items: center; gap: 2px; }
+.reaction {
+  font: inherit; font-size: .85rem; line-height: 1; min-width: 34px; min-height: 30px; padding: 4px 6px;
+  background: var(--card); border: 2px dashed var(--card-border); border-radius: 999px; cursor: pointer; color: var(--ink-soft);
+}
+.reaction.mise { border-style: solid; border-color: var(--garde); font-size: 1rem; color: var(--ink); }
+.reaction:disabled { cursor: default; border-style: solid; }
+.palette-reactions {
+  position: absolute; z-index: 20; bottom: calc(100% + 6px); left: 0; display: flex; gap: 2px; padding: 4px 6px;
+  background: var(--card); border: 2px solid var(--card-border); border-radius: 999px; box-shadow: 0 6px 18px rgba(0,0,0,.18);
+  animation: palette-entree .15s ease-out;
+}
+.palette-reactions button { font-size: 1.45rem; background: none; border: 0; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; padding: 0; }
+.palette-reactions button.choisi { background: var(--chip); }
+@keyframes palette-entree { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.pill.doublon { border-color: var(--late); }
+.g-reactions {
+  display: block; width: 100%; margin: 0 0 10px; padding: 10px 12px; font: inherit; font-weight: 600; text-align: left; color: var(--ink);
+  background: var(--chip); border: 2px solid var(--garde); border-radius: 14px; cursor: pointer;
+}
+.g-reactions[hidden] { display: none; }
+.g-vu { margin: -4px 0 10px; text-align: center; font-size: .9rem; font-weight: 600; color: var(--ink-soft); }
+.g-vu[hidden] { display: none; }
+.toast.avec-action { display: flex; align-items: center; gap: 12px; padding-right: 8px; }
+.toast-annuler {
+  font: inherit; font-size: .95rem; font-weight: 800; color: var(--ink); background: var(--card);
+  border: 0; border-radius: 999px; padding: 6px 14px; min-height: 36px; cursor: pointer;
+}
+
+/* Réveil oublié : grande fenêtre simple */
+.oubli { display: flex; flex-direction: column; gap: 10px; }
+.oubli p { margin: 0; }
+.oubli-heure { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 1.4rem; font-weight: 700; }
+.oubli-heure select { font: inherit; font-size: 1.4rem; padding: 6px 10px; border-radius: 12px; border: 2px solid var(--card-border); background: var(--chip); color: var(--ink); }
+.oubli .link { align-self: center; }
+.g-alerte-dodo { margin: 6px 0 0; padding: 8px 10px; border-radius: 12px; background: color-mix(in srgb, var(--wake) 30%, transparent); font-weight: 600; text-align: center; }
+.g-alerte-dodo[hidden] { display: none; }
+#oubli-erreur { color: var(--late); text-align: center; font-weight: 600; }
+#oubli-erreur:empty { display: none; }
+
+/* ---------- Garde simplifiée : 3 gros boutons et fenêtres à grands choix ---------- */
+.g-actions { display: flex; flex-direction: column; gap: 10px; }
+.g-tuiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.g-tuiles[hidden] { display: none; }
+.g-tuile {
+  font: inherit; color: #fff; background: var(--garde); border: 0; border-radius: 20px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-height: 118px; padding: 10px 4px; box-shadow: 0 4px 0 color-mix(in srgb, var(--garde) 70%, #000);
+  transition: transform .1s;
+}
+.g-tuile:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--garde) 70%, #000); }
+.g-tuile.on { background: var(--wake); color: #3a2508; box-shadow: 0 4px 0 color-mix(in srgb, var(--wake) 70%, #000); }
+.g-tuile-emoji { font-size: 2.4rem; line-height: 1.1; }
+.g-tuile-nom { font-size: 1.12rem; font-weight: 800; line-height: 1.15; text-align: center; }
+.g-tuile-sous { font-size: .82rem; font-weight: 600; opacity: .92; text-align: center; }
+.g-changer, .g-oubli-lien {
+  font: inherit; font-size: 1rem; font-weight: 700; color: var(--garde); background: var(--chip);
+  border: 2px solid var(--card-border); border-radius: 14px; padding: 10px 12px; min-height: 48px; cursor: pointer;
+}
+.g-changer[hidden] { display: none; }
+.g-feuille-corps { display: flex; flex-direction: column; gap: 10px; }
+.g-feuille-label { margin: 6px 0 0; font-weight: 700; color: var(--ink-soft); }
+.g-feuille-erreur { margin: 0; color: var(--late); font-weight: 700; text-align: center; }
+.g-feuille-fermer { display: block; margin: 12px auto 0; font-size: 1.05rem; }
+.g-gros {
+  font: inherit; font-size: 1.2rem; font-weight: 800; color: var(--ink); background: var(--chip);
+  border: 2px solid var(--card-border); border-radius: 16px; padding: 12px; min-height: 60px; cursor: pointer;
+}
+.g-gros.principal { background: var(--garde); color: #fff; border-color: transparent; }
+.g-gros.danger { background: var(--late); color: #fff; border-color: transparent; }
+.g-gros.choix { flex: 1; font-size: 1.05rem; }
+.g-gros.choix[aria-pressed="true"] { background: var(--garde); color: #fff; border-color: transparent; }
+.g-gros.rond { width: 64px; height: 64px; border-radius: 50%; font-size: 1.8rem; padding: 0; }
+.g-quantite { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.g-quantite-val { font-size: 2rem; font-weight: 800; flex: 1; text-align: center; }
+.g-rangee { display: flex; gap: 8px; }
+.garde-recap .pill { font-size: 1.02rem; padding: 7px 12px; }
+#page-garde .g-title { font-size: 1.2rem; }
+/* Il dort : grand bandeau pour noter le réveil */
+.g-reveil {
+  font: inherit; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%;
+  padding: 14px 12px; border: 0; border-radius: 20px; cursor: pointer; color: #3a2508; background: var(--wake);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--wake) 70%, #000);
+  animation: reveil-doux 2.6s ease-in-out infinite;
+}
+.g-reveil[hidden] { display: none; }
+.g-reveil-haut { font-size: 1.05rem; font-weight: 700; }
+.g-reveil-bas { font-size: 1.25rem; font-weight: 800; }
+@keyframes reveil-doux { 50% { transform: scale(1.015); } }
+@media (prefers-reduced-motion: reduce) { .g-reveil { animation: none; } }
+.g-liens { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.g-liens .g-oubli-lien { font-size: .95rem; padding: 10px 8px; }
+.note-card.modifiable { cursor: pointer; }
+.note-card.modifiable .note-head::after { content: " ✏️"; }
+.g-mot-zone {
+  font: inherit; font-size: 1.1rem; width: 100%; box-sizing: border-box; padding: 12px; border-radius: 14px;
+  border: 2px solid var(--card-border); background: var(--chip); color: var(--ink); resize: vertical;
+}
+#page-garde .day-nav { margin-bottom: 4px; }
+/* Croix pour fermer une fenêtre (en haut à droite) */
+.sheet-croix {
+  position: absolute; top: 10px; right: 10px; z-index: 2; width: 40px; height: 40px; border-radius: 50%;
+  font: inherit; font-size: 1.15rem; font-weight: 800; line-height: 1; color: var(--ink);
+  background: var(--chip); border: 2px solid var(--card-border); cursor: pointer;
+}
+.mode[hidden], #page-repas .detail[hidden] { display: none; }
+
+/* Mode nuit doux (22 h – 6 h, quel que soit le réglage du téléphone) :
+   tons sombres et chauds, texte moins blanc, pour ne pas s'éblouir au biberon de nuit */
+html:root.nuit-douce {
+  --sky-top: #160f14;
+  --sky-bottom: #2c1d24;
+  --sun: #dccab4;
+  --sun-face: #7a6458;
+  --cloud: #3b2a33;
+  --hill-back: #31232b;
+  --hill-front: #251a20;
+  --acacia: #3c463c;
+  --trunk: #33262b;
+  --giraffe: #82664f;
+  --giraffe-spot: #574234;
+  --giraffe-dark: #6f5642;
+  --muzzle: #a89280;
+  --elephant: #927e6c;
+  --elephant-dark: #7c6a5a;
+  --ear-in: #a87b83;
+  --meerkat: #b3a8ae;
+  --meerkat-belly: #a6828d;
+  --pond: #43505f;
+  --pond-shine: #7c8a9a;
+  --bird-body: #a87382;
+  --bird-belly: #b6929d;
+  --bird-wing: #9a6676;
+  --bird-wing-back: #b08190;
+  --bird2-body: #8a779c;
+  --bird2-wing: #7b6a8e;
+  --bird2-wing-back: #9b8aac;
+  --hortensia: #a8657c;
+  --hortensia-2: #82708f;
+  --hortensia-clair: #b48f9b;
+  --boule-fond: #74566a;
+  --sleep: #a598d0;
+  --wake: #d9b177;
+  --couche: #86ada7;
+  --sante: #c98890;
+  --garde: #c09c7a;
+  --chart-repas: #b06776;
+  --chart-sommeil: #8576b8;
+  --milk: #c98593;
+  --breast: #b088a8;
+
+  --card: rgba(40, 27, 33, 0.93);
+  --card-border: #4d3640;
+  --ink: #ecd6d0;
+  --ink-soft: #ae9198;
+  --accent: #cf8291;
+  --accent-ink: #24141a;
+  --chip: #3a2830;
+  --chip-on: #a5b694;
+  --chip-on-ink: #1f2119;
+  --mane: #82664f;
+  --lion: #82664f;
+  --ours: #82664f;
+  --ours-int: #a87b83;
+  --ours-museau: #a89280;
+  --cheek: #b97c86;
+  --good: #98b789;
+  --warn: #d6a86b;
+  --late: #dc8282;
+  --shadow: 0 6px 0 rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+
+/* ---------- Le ciel suit l'heure (téléphone en mode clair) ---------- */
+@media (prefers-color-scheme: light) {
+  html:root.ciel-aube { --sky-top: #f6c2cf; --sky-bottom: #fdeee6; --sun: #f9d0a0; }
+  html:root.ciel-couchant { --sky-top: #f1a07f; --sky-bottom: #fbd9c4; --sun: #f5a46a; }
+  html:root.ciel-crepuscule { --sky-top: #a06d93; --sky-bottom: #f2b8a6; --sun: #f6b98a; }
+}
+
+/* ---------- Lucioles (mode nuit doux) : derrière les cartes, jamais sur les boutons ---------- */
+.lucioles { position: absolute; inset: 0; display: none; }
+html:root.nuit-douce .lucioles { display: block; }
+.lucioles i {
+  position: absolute; width: 4px; height: 4px; border-radius: 50%; opacity: 0;
+  background: #ffdc85; box-shadow: 0 0 6px 2px rgba(255, 205, 110, .5);
+  animation: luciole 11s ease-in-out infinite;
+}
+.lucioles i:nth-child(1) { left: 8%; top: 18%; animation-delay: 0s; }
+.lucioles i:nth-child(2) { left: 22%; top: 34%; animation-delay: 3.5s; animation-duration: 13s; }
+.lucioles i:nth-child(3) { left: 41%; top: 12%; animation-delay: 6s; }
+.lucioles i:nth-child(4) { left: 63%; top: 28%; animation-delay: 1.8s; animation-duration: 14s; }
+.lucioles i:nth-child(5) { left: 80%; top: 15%; animation-delay: 8s; }
+.lucioles i:nth-child(6) { left: 92%; top: 42%; animation-delay: 4.6s; animation-duration: 12s; }
+.lucioles i:nth-child(7) { left: 4%; top: 58%; animation-delay: 9.5s; }
+.lucioles i:nth-child(8) { left: 95%; top: 70%; animation-delay: 2.6s; animation-duration: 15s; }
+@keyframes luciole {
+  0% { opacity: 0; transform: translate(0, 0); }
+  20% { opacity: .9; }
+  45% { opacity: .25; transform: translate(14px, -16px); }
+  70% { opacity: .85; }
+  100% { opacity: 0; transform: translate(-10px, -34px); }
+}
+
+/* ---------- L'ourson cligne des yeux, et bâille le soir ---------- */
+.lion .eyes-open { transform-origin: 50px 50px; animation: cligne 6s infinite 1s; }
+.lion .baille { opacity: 0; transform-box: fill-box; transform-origin: center top; }
+.soir .lion .baille { animation: baille 18s ease-in-out infinite 4s; }
+.soir .lion .sourire { animation: sourire-cache 18s ease-in-out infinite 4s; }
+@keyframes baille { 0%, 80%, 100% { opacity: 0; transform: scaleY(.2); } 84%, 93% { opacity: 1; transform: scaleY(1); } }
+@keyframes sourire-cache { 0%, 79%, 100% { opacity: 1; } 82%, 95% { opacity: 0; } }
+
+/* ---------- Onglet choisi : l'icône fait un petit saut ---------- */
+.tab-emoji { display: inline-block; }
+.tab[aria-selected="true"] .tab-emoji { animation: saut-onglet .5s cubic-bezier(.3, .7, .4, 1.6); }
+@keyframes saut-onglet { 0% { transform: translateY(0) scale(1); } 40% { transform: translateY(-7px) scale(1.15); } 100% { transform: translateY(0) scale(1); } }
+
+/* ---------- Cartes qui arrivent en douceur ---------- */
+.arrive { animation: arrive .45s cubic-bezier(.2, .8, .3, 1) both; }
+@keyframes arrive { from { opacity: .35; transform: translateY(14px); } }
+
+/* ---------- Liste vide : un petit animal qui respire ---------- */
+.empty[data-animal] { text-align: center; padding: 10px 0 4px; }
+.empty[data-animal]::before {
+  content: attr(data-animal); display: block; font-size: 2.6rem; line-height: 1.2; margin-bottom: 4px;
+  animation: respire 3.5s ease-in-out infinite;
+}
+@keyframes respire { 50% { transform: scale(1.08) rotate(-3deg); } }
+
+/* ---------- Graphique : aujourd'hui ressort, les barres poussent depuis le bas ---------- */
+.chart-col:not(.today):not(.actif) .chart-bar { opacity: .6; }
+.pousse .chart-bar { transform-box: fill-box; transform-origin: bottom; animation: pousse .7s cubic-bezier(.3, .8, .4, 1.15) both; }
+.pousse .chart-col[data-i="1"] .chart-bar { animation-delay: .05s; }
+.pousse .chart-col[data-i="2"] .chart-bar { animation-delay: .1s; }
+.pousse .chart-col[data-i="3"] .chart-bar { animation-delay: .15s; }
+.pousse .chart-col[data-i="4"] .chart-bar { animation-delay: .2s; }
+.pousse .chart-col[data-i="5"] .chart-bar { animation-delay: .25s; }
+.pousse .chart-col[data-i="6"] .chart-bar { animation-delay: .3s; }
+@keyframes pousse { from { transform: scaleY(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .lucioles, .soir .lion .baille { display: none; }
+  .lion .eyes-open, .tab-emoji, .arrive, .empty[data-animal]::before, .pousse .chart-bar { animation: none !important; }
+}
+
+/* ---------- Quoi de neuf ? ---------- */
+.nouveautes-box { position: relative; text-align: center; }
+.nouveautes-liste { list-style: none; margin: 4px 0 0; padding: 0; text-align: left; max-height: 52vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.nouveautes-liste li { display: flex; gap: 12px; align-items: flex-start; padding: 10px 2px; border-top: 2px dashed var(--card-border); line-height: 1.35; font-size: .98rem; }
+.nouveautes-liste li:first-child { border-top: 0; }
+.nouveautes-liste strong { color: var(--accent); }
+.nv-emoji { font-size: 1.6rem; line-height: 1.1; flex: none; width: 2rem; text-align: center; }
+.nouveautes .g-btn { background: var(--accent); color: var(--accent-ink); width: 100%; }
+.nouveautes[open] .nouveautes-liste li { animation: apparait .35s ease both; }
+.nouveautes[open] .nouveautes-liste li:nth-child(2) { animation-delay: .05s; }
+.nouveautes[open] .nouveautes-liste li:nth-child(3) { animation-delay: .1s; }
+.nouveautes[open] .nouveautes-liste li:nth-child(4) { animation-delay: .15s; }
+.nouveautes[open] .nouveautes-liste li:nth-child(5) { animation-delay: .2s; }
